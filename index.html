@@ -10,23 +10,15 @@
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:'Noto Sans KR',sans-serif; background:#f5f0eb; color:#2d2a26; overflow-x:hidden; }
-
-/* Header */
 .header { background:linear-gradient(135deg,#1a3a2a 0%,#2d5a3d 100%); color:#fff; padding:16px 20px 12px; position:relative; z-index:1000; }
 .header h1 { font-size:18px; font-weight:800; letter-spacing:-0.5px; }
 .header .subtitle { font-size:12px; color:#a8d4b8; margin-top:2px; }
-
-/* Tab bar */
 .tabs { display:flex; background:#fff; border-bottom:2px solid #e8e2da; position:sticky; top:0; z-index:999; }
 .tab { flex:1; padding:12px 0; text-align:center; font-size:14px; font-weight:600; cursor:pointer; border-bottom:3px solid transparent; transition:all .2s; color:#999; }
 .tab.active-day1 { color:#2563eb; border-bottom-color:#2563eb; }
 .tab.active-day2 { color:#ea580c; border-bottom-color:#ea580c; }
 .tab.active-budget { color:#16a34a; border-bottom-color:#16a34a; }
-
-/* Map */
 #map { width:100%; height:45vh; min-height:300px; }
-
-/* Budget summary bar */
 .budget-bar { background:#fff; padding:12px 20px; border-bottom:1px solid #e8e2da; display:flex; align-items:center; gap:12px; }
 .budget-ring { width:48px; height:48px; position:relative; flex-shrink:0; }
 .budget-ring svg { transform:rotate(-90deg); }
@@ -35,15 +27,12 @@ body { font-family:'Noto Sans KR',sans-serif; background:#f5f0eb; color:#2d2a26;
 .budget-info .title { font-size:11px; color:#888; }
 .budget-info .amount { font-size:18px; font-weight:800; color:#2d2a26; }
 .budget-info .detail { font-size:11px; color:#16a34a; margin-top:2px; }
-
-/* Place list */
 .place-list { padding:0 16px 100px; }
 .time-label { display:flex; align-items:center; gap:8px; padding:16px 0 8px; }
 .time-label .dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
 .time-label .dot.day1 { background:#2563eb; }
 .time-label .dot.day2 { background:#ea580c; }
 .time-label .time { font-size:12px; font-weight:600; color:#888; }
-
 .place-card { background:#fff; border-radius:14px; padding:16px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.06); position:relative; overflow:hidden; }
 .place-card.refundable { border-left:4px solid #16a34a; }
 .place-card .badge { position:absolute; top:12px; right:12px; background:#dcfce7; color:#16a34a; font-size:10px; font-weight:800; padding:3px 8px; border-radius:20px; }
@@ -53,15 +42,11 @@ body { font-family:'Noto Sans KR',sans-serif; background:#f5f0eb; color:#2d2a26;
 .place-card .meta span { font-size:11px; color:#888; background:#f5f0eb; padding:2px 8px; border-radius:8px; }
 .place-card .phone-btn { display:inline-flex; align-items:center; gap:4px; background:#2d5a3d; color:#fff; font-size:12px; font-weight:600; padding:6px 14px; border-radius:20px; text-decoration:none; }
 .place-card .phone-btn:active { background:#1a3a2a; }
-
-/* Spend input */
 .spend-row { display:flex; align-items:center; gap:8px; margin-top:10px; padding-top:10px; border-top:1px dashed #e8e2da; }
 .spend-row label { font-size:12px; color:#888; white-space:nowrap; }
 .spend-row input { width:100px; border:1.5px solid #d4cfc7; border-radius:8px; padding:6px 10px; font-size:14px; font-family:'Noto Sans KR'; text-align:right; outline:none; }
 .spend-row input:focus { border-color:#2d5a3d; }
 .spend-row .won { font-size:13px; color:#666; }
-
-/* Budget tab */
 .budget-page { padding:16px; display:none; }
 .budget-page.active { display:block; }
 .budget-section { background:#fff; border-radius:14px; padding:20px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
@@ -71,31 +56,24 @@ body { font-family:'Noto Sans KR',sans-serif; background:#f5f0eb; color:#2d2a26;
 .budget-row .label { font-size:13px; color:#666; }
 .budget-row .value { font-size:14px; font-weight:800; }
 .budget-row .refund-badge { font-size:10px; background:#dcfce7; color:#16a34a; padding:2px 6px; border-radius:10px; margin-left:6px; }
-
 .total-bar { background:linear-gradient(135deg,#1a3a2a,#2d5a3d); color:#fff; border-radius:14px; padding:20px; text-align:center; }
 .total-bar .big { font-size:28px; font-weight:800; }
 .total-bar .sub { font-size:12px; color:#a8d4b8; margin-top:4px; }
-
-/* Leaflet overrides */
 .leaflet-popup-content-wrapper { border-radius:12px !important; }
 .leaflet-popup-content { margin:10px 14px !important; font-family:'Noto Sans KR' !important; }
 </style>
 </head>
 <body>
-
 <div class="header">
   <h1>🌾 고창 1박2일</h1>
   <div class="subtitle">4/26(일) ~ 4/27(월) · 3명</div>
 </div>
-
 <div class="tabs">
   <div class="tab active-day1" id="tab1" onclick="switchTab(1)">1일차 (일)</div>
   <div class="tab" id="tab2" onclick="switchTab(2)">2일차 (월)</div>
   <div class="tab" id="tab3" onclick="switchTab(3)">💰 지출</div>
 </div>
-
 <div id="map"></div>
-
 <div class="budget-bar" id="budgetBar">
   <div class="budget-ring">
     <svg width="48" height="48" viewBox="0 0 48 48">
@@ -107,25 +85,22 @@ body { font-family:'Noto Sans KR',sans-serif; background:#f5f0eb; color:#2d2a26;
   <div class="budget-info">
     <div class="title">환급 가능 지출</div>
     <div class="amount" id="refundTotal">0원</div>
-    <div class="detail" id="refundDetail">예상 환급 (70%): 0원 / 목표 20만원</div>
+    <div class="detail" id="refundDetail">예상 환급: 0원 / 최대 14만원</div>
   </div>
 </div>
-
 <div class="place-list" id="placeList"></div>
 <div class="budget-page" id="budgetPage"></div>
 
 <script>
 const PLACES = [
-  // Day 1
   { id:'sundubu', day:1, time:'11:00', name:'모양성순두부', menu:'빨간순두부 · 하얀순두부(바지락)', phone:'063-564-0337', hours:'일 09~21시 / 월 휴무', lat:35.4331867, lng:126.7065134, refundable:true, type:'food' },
   { id:'eupseong', day:1, time:'12:00', name:'고창읍성', menu:'철쭉 산책 · 성벽 한 바퀴 40분', phone:'063-560-8067', hours:'09~22시', lat:35.4308877, lng:126.70447619, refundable:false, type:'spot' },
   { id:'hotel_in', day:1, time:'12:50', name:'웰파크호텔 체크인', menu:'짐 풀기', phone:'063-560-3333', hours:'체크인 15시 / 체크아웃 11시', lat:35.4314742, lng:126.74183610, refundable:false, type:'hotel' },
   { id:'sugung', day:1, time:'13:30', name:'수궁회관', menu:'간장게장 + 바지락비빔밥', phone:'네이버 검색', hours:'확인 필요', lat:35.536, lng:126.554, refundable:true, type:'food', address:'심원면 심원로 218' },
   { id:'barley', day:1, time:'15:00', name:'학원농장 청보리밭', menu:'축제 중 · 유채꽃 · 도깨비촬영지', phone:'063-564-9897', hours:'09:30~18:00', lat:35.3766234, lng:126.54189889, refundable:false, type:'spot', note:'주차 1만원→상품권 환급' },
-  { id:'geumdan', day:1, time:'17:30', name:'금단양만', menu:'민물장어 셀프구이 (1kg 66,000원)', phone:'063-563-5125', hours:'10:30~21:00', lat:35.5365263, lng:126.55429459, refundable:true, type:'food', note:'환급 가맹 확인 필요' },
+  { id:'geumdan', day:1, time:'17:30', name:'금단양만', menu:'민물장어 셀프구이 (1kg 66,000원)', phone:'063-563-5125', hours:'10:30~21:00', lat:35.5365263, lng:126.55429459, refundable:false, type:'food' },
   { id:'joyang', day:1, time:'19:30', name:'옛도심조양관', menu:'감성 카페 · 읍성 근처', phone:'010-2198-9421', hours:'10:30~21:00', lat:35.4337237, lng:126.70138469, refundable:false, type:'cafe' },
   { id:'oncheon1', day:1, time:'20:30', name:'웰파크호텔 온천', menu:'석정온천 (투숙객 6,000원)', phone:'063-560-3333', hours:'주중06~20시/주말~21시', lat:35.4314742, lng:126.74183610, refundable:false, type:'hotel' },
-  // Day 2
   { id:'oncheon2', day:2, time:'07:00', name:'아침 온천', menu:'석정온천', phone:'', hours:'06시 오픈', lat:35.4314742, lng:126.74183610, refundable:false, type:'hotel' },
   { id:'checkout', day:2, time:'09:00', name:'호텔 체크아웃', menu:'짐 트렁크에', phone:'', hours:'', lat:35.4314742, lng:126.74183610, refundable:false, type:'hotel' },
   { id:'mungchi', day:2, time:'09:30', name:'뭉치네', menu:'산채비빔밥 · 파전', phone:'063-562-5878', hours:'11~21시', lat:35.504, lng:126.597, refundable:true, type:'food' },
@@ -135,236 +110,127 @@ const PLACES = [
   { id:'narae', day:2, time:'15:00', name:'나래궁 + 전통시장', menu:'짬짜면 (간식 마무리)', phone:'063-561-0957', hours:'11~19시 / 금 휴무', lat:35.4332323, lng:126.6968035, refundable:true, type:'food' },
 ];
 
-const ICON_MAP = { food:'🍽️', spot:'🏛️', cafe:'☕', hotel:'🏨' };
 const DAY_COLORS = { 1:'#2563eb', 2:'#ea580c' };
-
-let map, currentTab = 1;
-let day1Layers, day2Layers;
-let spending = {};
+const MAX_REFUND = 140000;
+let map, currentTab = 1, day1Layers, day2Layers, spending = {};
 
 function init() {
-  // Load saved spending
   try { spending = JSON.parse(localStorage.getItem('gc_spend') || '{}'); } catch(e) { spending = {}; }
-
   map = L.map('map',{ zoomControl:false }).setView([35.46, 126.65], 11);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution:'© OpenStreetMap',
-    maxZoom:18
-  }).addTo(map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution:'© OpenStreetMap', maxZoom:18 }).addTo(map);
   L.control.zoom({ position:'bottomright' }).addTo(map);
-
   day1Layers = L.layerGroup();
   day2Layers = L.layerGroup();
 
-  // Add markers and routes
   [1,2].forEach(day => {
     const dayPlaces = PLACES.filter(p => p.day === day);
     const coords = [];
     dayPlaces.forEach((p,i) => {
       const color = DAY_COLORS[day];
+      const num = i + 1;
       const icon = L.divIcon({
         className:'',
-        html:`<div style="background:${color};color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,.3);border:2px solid #fff;">${ICON_MAP[p.type]||'📍'}</div>`,
-        iconSize:[28,28],
-        iconAnchor:[14,14]
+        html:`<div style="position:relative;width:32px;height:32px;">
+          <div style="background:${color};color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;box-shadow:0 2px 6px rgba(0,0,0,.3);border:2px solid #fff;font-family:'Noto Sans KR';">${num}</div>
+          ${p.refundable ? '<div style="position:absolute;top:-4px;right:-4px;background:#16a34a;color:#fff;font-size:8px;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid #fff;">₩</div>' : ''}
+        </div>`,
+        iconSize:[32,32], iconAnchor:[16,16]
       });
       const marker = L.marker([p.lat,p.lng],{icon}).bindPopup(`
         <div style="min-width:160px">
-          <div style="font-weight:800;font-size:14px;margin-bottom:4px;">${p.name}</div>
+          <div style="font-weight:800;font-size:14px;margin-bottom:4px;">${num}. ${p.name}</div>
           <div style="font-size:12px;color:#666;margin-bottom:4px;">${p.menu}</div>
           ${p.refundable ? '<div style="font-size:10px;background:#dcfce7;color:#16a34a;display:inline-block;padding:2px 8px;border-radius:10px;font-weight:800;">💰 환급 가능</div>' : ''}
           ${p.phone ? `<div style="margin-top:6px;"><a href="tel:${p.phone.replace(/[^0-9\-+]/g,'')}" style="color:#2d5a3d;font-size:12px;font-weight:600;">📞 ${p.phone}</a></div>` : ''}
         </div>
       `);
-      if(day===1) day1Layers.addLayer(marker);
-      else day2Layers.addLayer(marker);
+      if(day===1) day1Layers.addLayer(marker); else day2Layers.addLayer(marker);
       coords.push([p.lat,p.lng]);
     });
     const polyline = L.polyline(coords, { color:DAY_COLORS[day], weight:3, opacity:0.6, dashArray:'8,8' });
-    if(day===1) day1Layers.addLayer(polyline);
-    else day2Layers.addLayer(polyline);
+    if(day===1) day1Layers.addLayer(polyline); else day2Layers.addLayer(polyline);
   });
-
   day1Layers.addTo(map);
   switchTab(1);
 }
 
 function switchTab(tab) {
   currentTab = tab;
-  document.querySelectorAll('.tab').forEach(t => { t.className='tab'; });
-  if(tab===1) { document.getElementById('tab1').className='tab active-day1'; }
-  else if(tab===2) { document.getElementById('tab2').className='tab active-day2'; }
-  else { document.getElementById('tab3').className='tab active-budget'; }
+  document.querySelectorAll('.tab').forEach(t => t.className='tab');
+  if(tab===1) document.getElementById('tab1').className='tab active-day1';
+  else if(tab===2) document.getElementById('tab2').className='tab active-day2';
+  else document.getElementById('tab3').className='tab active-budget';
 
-  const mapEl = document.getElementById('map');
-  const budgetBar = document.getElementById('budgetBar');
-  const placeList = document.getElementById('placeList');
-  const budgetPage = document.getElementById('budgetPage');
-
-  if(tab===3) {
-    mapEl.style.display='none';
-    budgetBar.style.display='none';
-    placeList.style.display='none';
-    budgetPage.className='budget-page active';
-    renderBudgetPage();
-    return;
-  }
-
-  mapEl.style.display='block';
-  budgetBar.style.display='flex';
-  placeList.style.display='block';
-  budgetPage.className='budget-page';
-
+  const mapEl=document.getElementById('map'), budgetBar=document.getElementById('budgetBar'), placeList=document.getElementById('placeList'), budgetPage=document.getElementById('budgetPage');
+  if(tab===3) { mapEl.style.display='none'; budgetBar.style.display='none'; placeList.style.display='none'; budgetPage.className='budget-page active'; renderBudgetPage(); return; }
+  mapEl.style.display='block'; budgetBar.style.display='flex'; placeList.style.display='block'; budgetPage.className='budget-page';
   map.invalidateSize();
-
-  // Toggle layers
-  if(tab===1) {
-    if(!map.hasLayer(day1Layers)) map.addLayer(day1Layers);
-    if(map.hasLayer(day2Layers)) map.removeLayer(day2Layers);
-    const bounds = L.latLngBounds(PLACES.filter(p=>p.day===1).map(p=>[p.lat,p.lng]));
-    map.fitBounds(bounds.pad(0.15));
-  } else {
-    if(!map.hasLayer(day2Layers)) map.addLayer(day2Layers);
-    if(map.hasLayer(day1Layers)) map.removeLayer(day1Layers);
-    const bounds = L.latLngBounds(PLACES.filter(p=>p.day===2).map(p=>[p.lat,p.lng]));
-    map.fitBounds(bounds.pad(0.15));
-  }
-
-  renderPlaceList(tab);
-  updateBudgetBar();
+  if(tab===1) { if(!map.hasLayer(day1Layers)) map.addLayer(day1Layers); if(map.hasLayer(day2Layers)) map.removeLayer(day2Layers); map.fitBounds(L.latLngBounds(PLACES.filter(p=>p.day===1).map(p=>[p.lat,p.lng])).pad(0.15)); }
+  else { if(!map.hasLayer(day2Layers)) map.addLayer(day2Layers); if(map.hasLayer(day1Layers)) map.removeLayer(day1Layers); map.fitBounds(L.latLngBounds(PLACES.filter(p=>p.day===2).map(p=>[p.lat,p.lng])).pad(0.15)); }
+  renderPlaceList(tab); updateBudgetBar();
 }
 
 function renderPlaceList(day) {
-  const list = document.getElementById('placeList');
-  const places = PLACES.filter(p => p.day === day);
-  let html = '';
-  places.forEach(p => {
-    const isFood = p.type === 'food' || p.type === 'cafe';
-    const spendVal = spending[p.id] || '';
-    html += `
-      <div class="time-label">
-        <div class="dot day${day}"></div>
-        <div class="time">${p.time}</div>
-      </div>
+  const list=document.getElementById('placeList'), places=PLACES.filter(p=>p.day===day);
+  let html='';
+  places.forEach((p,i) => {
+    const isFood=p.type==='food'||p.type==='cafe', spendVal=spending[p.id]||'';
+    html+=`<div class="time-label"><div class="dot day${day}"></div><div class="time">${p.time}</div></div>
       <div class="place-card ${p.refundable?'refundable':''}">
-        ${p.refundable ? '<div class="badge">💰 환급</div>' : ''}
-        <div class="name">${p.name}</div>
+        ${p.refundable?'<div class="badge">💰 환급</div>':''}
+        <div class="name">${i+1}. ${p.name}</div>
         <div class="menu">${p.menu}</div>
-        <div class="meta">
-          ${p.hours ? `<span>🕐 ${p.hours}</span>` : ''}
-          ${p.address ? `<span>📍 ${p.address}</span>` : ''}
-          ${p.note ? `<span>💡 ${p.note}</span>` : ''}
-        </div>
-        ${p.phone ? `<a class="phone-btn" href="tel:${p.phone.replace(/[^0-9\-+]/g,'')}">📞 ${p.phone}</a>` : ''}
-        ${isFood ? `
-          <div class="spend-row">
-            <label>💳 지출</label>
-            <input type="number" inputmode="numeric" placeholder="0" value="${spendVal}" onchange="updateSpend('${p.id}',this.value)" onfocus="this.select()">
-            <span class="won">원</span>
-          </div>
-        ` : ''}
-      </div>
-    `;
+        <div class="meta">${p.hours?`<span>🕐 ${p.hours}</span>`:''}${p.address?`<span>📍 ${p.address}</span>`:''}${p.note?`<span>💡 ${p.note}</span>`:''}</div>
+        ${p.phone?`<a class="phone-btn" href="tel:${p.phone.replace(/[^0-9\-+]/g,'')}">📞 ${p.phone}</a>`:''}
+        ${isFood?`<div class="spend-row"><label>💳 지출</label><input type="number" inputmode="numeric" placeholder="0" value="${spendVal}" onchange="updateSpend('${p.id}',this.value)" onfocus="this.select()"><span class="won">원</span></div>`:''}
+      </div>`;
   });
-  list.innerHTML = html;
+  list.innerHTML=html;
 }
 
-function updateSpend(id, val) {
-  const num = parseInt(val) || 0;
-  if(num > 0) spending[id] = num;
-  else delete spending[id];
-  localStorage.setItem('gc_spend', JSON.stringify(spending));
-  updateBudgetBar();
-}
+function updateSpend(id,val) { const num=parseInt(val)||0; if(num>0) spending[id]=num; else delete spending[id]; localStorage.setItem('gc_spend',JSON.stringify(spending)); updateBudgetBar(); }
+function calcRefund(total) { return Math.min(total*0.7, MAX_REFUND); }
 
 function updateBudgetBar() {
-  const refundablePlaces = PLACES.filter(p => p.refundable);
-  let refundableTotal = 0;
-  refundablePlaces.forEach(p => { refundableTotal += (spending[p.id] || 0); });
-
-  const maxRefund = 200000;
-  const refundRate = 0.7;
-  const expectedRefund = Math.min(refundableTotal * 0.5, maxRefund) * refundRate;
-  const progress = Math.min(refundableTotal / (maxRefund * 2) * 100, 100);
-
-  document.getElementById('refundTotal').textContent = refundableTotal.toLocaleString() + '원';
-  document.getElementById('refundDetail').textContent = `예상 환급 (70%): ${Math.round(expectedRefund).toLocaleString()}원 / 목표 20만원`;
-
-  const circumference = 125.6;
-  const offset = circumference - (circumference * progress / 100);
-  document.getElementById('ringProgress').setAttribute('stroke-dashoffset', offset);
-  document.getElementById('ringLabel').textContent = Math.round(progress) + '%';
+  let refundableTotal=0;
+  PLACES.filter(p=>p.refundable).forEach(p=>{ refundableTotal+=(spending[p.id]||0); });
+  const expectedRefund=calcRefund(refundableTotal), progress=Math.min(refundableTotal/200000*100,100);
+  document.getElementById('refundTotal').textContent=refundableTotal.toLocaleString()+'원';
+  document.getElementById('refundDetail').textContent=`예상 환급 (70%): ${Math.round(expectedRefund).toLocaleString()}원 / 최대 14만원`;
+  const offset=125.6-(125.6*progress/100);
+  document.getElementById('ringProgress').setAttribute('stroke-dashoffset',offset);
+  document.getElementById('ringLabel').textContent=Math.round(progress)+'%';
 }
 
 function renderBudgetPage() {
-  const page = document.getElementById('budgetPage');
-  let totalAll = 0, totalRefundable = 0;
-
-  let day1Html = '', day2Html = '';
-  [1,2].forEach(day => {
-    const places = PLACES.filter(p => p.day === day && (p.type==='food'||p.type==='cafe'));
-    let rows = '';
-    places.forEach(p => {
-      const val = spending[p.id] || 0;
-      totalAll += val;
-      if(p.refundable) totalRefundable += val;
-      if(val > 0) {
-        rows += `<div class="budget-row">
-          <div class="label">${p.name}${p.refundable ? '<span class="refund-badge">환급</span>' : ''}</div>
-          <div class="value">${val.toLocaleString()}원</div>
-        </div>`;
-      }
+  const page=document.getElementById('budgetPage');
+  let totalAll=0,totalRefundable=0,day1Html='',day2Html='';
+  [1,2].forEach(day=>{
+    let rows='';
+    PLACES.filter(p=>p.day===day&&(p.type==='food'||p.type==='cafe')).forEach(p=>{
+      const val=spending[p.id]||0; totalAll+=val; if(p.refundable) totalRefundable+=val;
+      if(val>0) rows+=`<div class="budget-row"><div class="label">${p.name}${p.refundable?'<span class="refund-badge">환급</span>':''}</div><div class="value">${val.toLocaleString()}원</div></div>`;
     });
-    if(day===1) day1Html = rows;
-    else day2Html = rows;
+    if(day===1) day1Html=rows; else day2Html=rows;
   });
-
-  const expectedRefund = Math.min(totalRefundable * 0.5, 200000) * 0.7;
-
-  page.innerHTML = `
+  const expectedRefund=calcRefund(totalRefundable);
+  page.innerHTML=`
     <div class="total-bar">
-      <div style="font-size:12px;color:#a8d4b8;margin-bottom:4px;">예상 환급 (70%)</div>
+      <div style="font-size:12px;color:#a8d4b8;margin-bottom:4px;">예상 환급 (청년 70%)</div>
       <div class="big">${Math.round(expectedRefund).toLocaleString()}원</div>
-      <div class="sub">환급 가능 지출 ${totalRefundable.toLocaleString()}원 중 50% × 70%</div>
+      <div class="sub">환급 가능 지출 ${totalRefundable.toLocaleString()}원 × 70% (최대 14만원)</div>
     </div>
-
-    <div class="budget-section" style="margin-top:12px;">
-      <h3>🔵 1일차 (일)</h3>
-      ${day1Html || '<div style="font-size:13px;color:#999;padding:8px 0;">아직 입력된 지출이 없어요</div>'}
+    <div class="budget-section" style="margin-top:12px;"><h3>🔵 1일차 (일)</h3>${day1Html||'<div style="font-size:13px;color:#999;padding:8px 0;">아직 입력된 지출이 없어요</div>'}</div>
+    <div class="budget-section"><h3>🟠 2일차 (월)</h3>${day2Html||'<div style="font-size:13px;color:#999;padding:8px 0;">아직 입력된 지출이 없어요</div>'}</div>
+    <div class="budget-section"><h3>📊 요약</h3>
+      <div class="budget-row"><div class="label">총 식비</div><div class="value">${totalAll.toLocaleString()}원</div></div>
+      <div class="budget-row"><div class="label">환급 가능 가게 합계</div><div class="value" style="color:#16a34a">${totalRefundable.toLocaleString()}원</div></div>
+      <div class="budget-row"><div class="label">예상 환급 (70%, 최대 14만)</div><div class="value" style="color:#16a34a">${Math.round(expectedRefund).toLocaleString()}원</div></div>
+      <div class="budget-row"><div class="label">실질 식비 (총-환급)</div><div class="value">${(totalAll-Math.round(expectedRefund)).toLocaleString()}원</div></div>
     </div>
-
-    <div class="budget-section">
-      <h3>🟠 2일차 (월)</h3>
-      ${day2Html || '<div style="font-size:13px;color:#999;padding:8px 0;">아직 입력된 지출이 없어요</div>'}
-    </div>
-
-    <div class="budget-section">
-      <h3>📊 요약</h3>
-      <div class="budget-row">
-        <div class="label">총 식비</div>
-        <div class="value">${totalAll.toLocaleString()}원</div>
-      </div>
-      <div class="budget-row">
-        <div class="label">환급 가능 가게 합계</div>
-        <div class="value" style="color:#16a34a">${totalRefundable.toLocaleString()}원</div>
-      </div>
-      <div class="budget-row">
-        <div class="label">예상 환급 (50%×70%)</div>
-        <div class="value" style="color:#16a34a">${Math.round(expectedRefund).toLocaleString()}원</div>
-      </div>
-      <div class="budget-row">
-        <div class="label">실질 식비 (총-환급)</div>
-        <div class="value">${(totalAll - Math.round(expectedRefund)).toLocaleString()}원</div>
-      </div>
-    </div>
-
-    <div style="text-align:center;padding:16px;">
-      <button onclick="if(confirm('모든 지출 기록을 초기화할까요?')){spending={};localStorage.removeItem('gc_spend');switchTab(3);}" style="background:none;border:1px solid #ccc;border-radius:8px;padding:8px 20px;font-size:12px;color:#999;cursor:pointer;font-family:'Noto Sans KR';">지출 기록 초기화</button>
-    </div>
-  `;
+    <div style="text-align:center;padding:16px;"><button onclick="if(confirm('모든 지출 기록을 초기화할까요?')){spending={};localStorage.removeItem('gc_spend');switchTab(3);}" style="background:none;border:1px solid #ccc;border-radius:8px;padding:8px 20px;font-size:12px;color:#999;cursor:pointer;font-family:'Noto Sans KR';">지출 기록 초기화</button></div>`;
 }
-
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded',init);
 </script>
 </body>
 </html>
