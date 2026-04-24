@@ -28,13 +28,30 @@ body { font-family:'Noto Sans KR',sans-serif; background:#f5f0eb; color:#2d2a26;
 .budget-info .amount { font-size:18px; font-weight:800; color:#2d2a26; }
 .budget-info .detail { font-size:11px; color:#16a34a; margin-top:2px; }
 .place-list { padding:0 16px 100px; }
+
+/* Edit mode bar */
+.edit-bar { display:none; background:#fff3cd; padding:10px 16px; align-items:center; justify-content:space-between; border-bottom:1px solid #e8e2da; }
+.edit-bar.active { display:flex; }
+.edit-bar span { font-size:12px; color:#856404; font-weight:600; }
+.edit-bar button { padding:6px 16px; border-radius:8px; font-size:12px; font-weight:700; border:none; cursor:pointer; font-family:'Noto Sans KR'; }
+.edit-bar .save-btn { background:#2d5a3d; color:#fff; }
+.edit-bar .cancel-btn { background:#e8e2da; color:#666; margin-right:8px; }
+
+.edit-toggle { position:fixed; bottom:20px; right:20px; background:#2d5a3d; color:#fff; border:none; width:50px; height:50px; border-radius:50%; font-size:20px; box-shadow:0 4px 12px rgba(0,0,0,.2); cursor:pointer; z-index:1000; display:flex; align-items:center; justify-content:center; }
+.edit-toggle:active { background:#1a3a2a; }
+
 .time-label { display:flex; align-items:center; gap:8px; padding:16px 0 8px; }
 .time-label .dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
 .time-label .dot.day1 { background:#2563eb; }
 .time-label .dot.day2 { background:#ea580c; }
 .time-label .time { font-size:12px; font-weight:600; color:#888; }
-.place-card { background:#fff; border-radius:14px; padding:16px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.06); position:relative; overflow:hidden; }
+
+.place-card { background:#fff; border-radius:14px; padding:16px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.06); position:relative; overflow:hidden; transition:transform .15s, box-shadow .15s; }
 .place-card.refundable { border-left:4px solid #16a34a; }
+.place-card.dragging { opacity:0.5; transform:scale(0.97); box-shadow:0 4px 16px rgba(0,0,0,.15); }
+.place-card .drag-handle { display:none; position:absolute; left:4px; top:50%; transform:translateY(-50%); font-size:18px; color:#ccc; cursor:grab; padding:8px; }
+.place-card.editable .drag-handle { display:block; }
+.place-card.editable { padding-left:36px; }
 .place-card .badge { position:absolute; top:12px; right:12px; background:#dcfce7; color:#16a34a; font-size:10px; font-weight:800; padding:3px 8px; border-radius:20px; }
 .place-card .name { font-size:16px; font-weight:800; margin-bottom:4px; }
 .place-card .menu { font-size:13px; color:#666; margin-bottom:6px; }
@@ -73,6 +90,13 @@ body { font-family:'Noto Sans KR',sans-serif; background:#f5f0eb; color:#2d2a26;
   <div class="tab" id="tab2" onclick="switchTab(2)">2일차 (월)</div>
   <div class="tab" id="tab3" onclick="switchTab(3)">💰 지출</div>
 </div>
+<div class="edit-bar" id="editBar">
+  <span>✏️ 순서 편집 중 — 길게 눌러서 드래그</span>
+  <div>
+    <button class="cancel-btn" onclick="cancelEdit()">취소</button>
+    <button class="save-btn" onclick="saveEdit()">저장</button>
+  </div>
+</div>
 <div id="map"></div>
 <div class="budget-bar" id="budgetBar">
   <div class="budget-ring">
@@ -90,56 +114,77 @@ body { font-family:'Noto Sans KR',sans-serif; background:#f5f0eb; color:#2d2a26;
 </div>
 <div class="place-list" id="placeList"></div>
 <div class="budget-page" id="budgetPage"></div>
+<button class="edit-toggle" id="editToggle" onclick="toggleEdit()">✏️</button>
 
 <script>
-const PLACES = [
-  // === Day 1: 순두부→읍성→조양관→호텔→수궁회관→청보리밭→금단양만→온천 ===
-  { id:'sundubu', day:1, time:'11:00', name:'모양성순두부', menu:'빨간순두부 · 하얀순두부(바지락)', phone:'063-564-0337', hours:'일 09~21시 / 월 휴무',
-    lat:35.4331867, lng:126.7065134, mapLat:35.440, mapLng:126.690, refundable:true, type:'food' },
-  { id:'eupseong', day:1, time:'12:00', name:'고창읍성', menu:'철쭉 산책 · 성벽 한 바퀴 40분', phone:'063-560-8067', hours:'09~22시',
-    lat:35.4308877, lng:126.70447619, mapLat:35.425, mapLng:126.700, refundable:false, type:'spot' },
-  { id:'joyang', day:1, time:'12:40', name:'조양관카페', menu:'감성 카페 · 읍성 근처', phone:'010-2198-9421', hours:'10:30~21:00',
-    lat:35.4337237, lng:126.70138469, mapLat:35.432, mapLng:126.718, refundable:false, type:'cafe' },
-  { id:'hotel_in', day:1, time:'13:20', name:'웰파크호텔', menu:'체크인 · 짐 풀기', phone:'063-560-3333', hours:'체크인15시/체크아웃11시',
-    lat:35.4314742, lng:126.74183610, mapLat:35.438, mapLng:126.745, refundable:false, type:'hotel' },
-  { id:'sugung', day:1, time:'14:00', name:'수궁회관', menu:'간장게장 + 바지락비빔밥', phone:'네이버 검색', hours:'확인 필요',
+const DEFAULT_PLACES = [
+  // === Day 1: 수궁회관→선운사→호텔→조양관→금단양만→청보리밭→읍성→순두부→온천 ===
+  { id:'sugung', day:1, time:'11:00', name:'수궁회관', menu:'간장게장 + 바지락비빔밥', phone:'네이버 검색', hours:'확인 필요',
     lat:35.536, lng:126.554, mapLat:35.536, mapLng:126.554, refundable:true, type:'food', address:'심원면 심원로 218' },
-  { id:'barley', day:1, time:'15:30', name:'청보리밭', menu:'축제 중 · 유채꽃 · 도깨비촬영지', phone:'063-564-9897', hours:'09:30~18:00',
-    lat:35.3766234, lng:126.54189889, mapLat:35.3766, mapLng:126.542, refundable:false, type:'spot', note:'주차 1만원→상품권 환급' },
-  { id:'geumdan', day:1, time:'17:30', name:'금단양만', menu:'민물장어 셀프구이 (1kg 66,000원)', phone:'063-563-5125', hours:'10:30~21:00',
+  { id:'seonunsa_d1', day:1, time:'12:00', name:'선운사', menu:'산책 약 1시간 (입장 3,000원)', phone:'063-561-1422', hours:'09~17시',
+    lat:35.4969385, lng:126.57822549, mapLat:35.495, mapLng:126.578, refundable:false, type:'spot' },
+  { id:'hotel_in', day:1, time:'13:30', name:'웰파크호텔', menu:'체크인 · 짐 풀기', phone:'063-560-3333', hours:'체크인15시/체크아웃11시',
+    lat:35.4314742, lng:126.74183610, mapLat:35.438, mapLng:126.745, refundable:false, type:'hotel' },
+  { id:'joyang', day:1, time:'14:00', name:'조양관카페', menu:'감성 카페 · 읍성 근처', phone:'010-2198-9421', hours:'10:30~21:00',
+    lat:35.4337237, lng:126.70138469, mapLat:35.445, mapLng:126.718, refundable:false, type:'cafe' },
+  { id:'geumdan', day:1, time:'15:00', name:'금단양만', menu:'민물장어 셀프구이 (1kg 66,000원)', phone:'063-563-5125', hours:'10:30~21:00',
     lat:35.5365263, lng:126.55429459, mapLat:35.545, mapLng:126.562, refundable:false, type:'food' },
-  { id:'oncheon1', day:1, time:'19:30', name:'호텔 온천', menu:'석정온천 (투숙객 6,000원)', phone:'063-560-3333', hours:'주말~21시',
+  { id:'barley', day:1, time:'16:30', name:'청보리밭', menu:'축제 중 · 유채꽃 · 노을 타임!', phone:'063-564-9897', hours:'상시(일몰추천)',
+    lat:35.3766234, lng:126.54189889, mapLat:35.3766, mapLng:126.542, refundable:false, type:'spot', note:'주차 1만원→상품권 환급' },
+  { id:'eupseong', day:1, time:'18:30', name:'고창읍성', menu:'철쭉 산책 · 석양 뷰', phone:'063-560-8067', hours:'09~22시',
+    lat:35.4308877, lng:126.70447619, mapLat:35.425, mapLng:126.700, refundable:false, type:'spot' },
+  { id:'sundubu', day:1, time:'19:10', name:'모양성순두부', menu:'빨간순두부 · 하얀순두부(바지락)', phone:'063-564-0337', hours:'일 09~21시 / 월 휴무',
+    lat:35.4331867, lng:126.7065134, mapLat:35.440, mapLng:126.690, refundable:true, type:'food' },
+  { id:'oncheon1', day:1, time:'19:50', name:'호텔 온천', menu:'석정온천 (투숙객 6,000원)', phone:'063-560-3333', hours:'주말~21시',
     lat:35.4314742, lng:126.74183610, mapLat:35.425, mapLng:126.748, refundable:false, type:'hotel' },
 
-    // === Day 2: 수정 ===
+  // === Day 2 ===
   { id:'oncheon2', day:2, time:'07:00', name:'아침온천', menu:'석정온천', phone:'', hours:'06시 오픈',
     lat:35.4314742, lng:126.74183610, mapLat:35.435, mapLng:126.750, refundable:false, type:'hotel' },
   { id:'checkout', day:2, time:'09:00', name:'체크아웃', menu:'짐 트렁크에', phone:'', hours:'',
     lat:35.4314742, lng:126.74183610, mapLat:35.425, mapLng:126.745, refundable:false, type:'hotel' },
-
-  { id:'myeonok', day:2, time:'10:00', name:'고창면옥', menu:'냉면 · 갈비탕 · 만두', phone:'063-561-1007', hours:'11~20시 연중무휴',
-    lat:35.4308985, lng:126.72698039, mapLat:35.438, mapLng:126.727, refundable:true, type:'food' },
-
-  { id:'seonunsa', day:2, time:'11:30', name:'선운사', menu:'산책 약 1시간 (입장 3,000원)', phone:'063-561-1422', hours:'09~17시',
-    lat:35.4969385, lng:126.57822549, mapLat:35.495, mapLng:126.578, refundable:false, type:'spot' },
-
-  { id:'mungchi', day:2, time:'13:30', name:'뭉치네', menu:'산채비빔밥 · 파전', phone:'063-562-5878', hours:'11~21시',
+  { id:'mungchi', day:2, time:'09:30', name:'뭉치네', menu:'산채비빔밥 · 파전', phone:'063-562-5878', hours:'11~21시',
     lat:35.504, lng:126.597, mapLat:35.510, mapLng:126.600, refundable:true, type:'food' },
+  { id:'seonunsa', day:2, time:'10:30', name:'선운사', menu:'산책 약 1시간 (입장 3,000원)', phone:'063-561-1422', hours:'09~17시',
+    lat:35.4969385, lng:126.57822549, mapLat:35.498, mapLng:126.580, refundable:false, type:'spot' },
+  { id:'yeondawon', day:2, time:'12:00', name:'연다원', menu:'녹차밭+저수지 뷰 · 크루아상', phone:'063-561-4443', hours:'월 영업 확인 필요',
+    lat:35.4914574, lng:126.62796700, mapLat:35.491, mapLng:126.628, refundable:false, type:'cafe' },
+  { id:'myeonok', day:2, time:'13:30', name:'고창면옥', menu:'냉면 · 갈비탕 · 만두', phone:'063-561-1007', hours:'11~20시 연중무휴',
+    lat:35.4308985, lng:126.72698039, mapLat:35.438, mapLng:126.727, refundable:false, type:'food' },
+  { id:'narae', day:2, time:'15:00', name:'나래궁', menu:'짬짜면 · 전통시장', phone:'063-561-0957', hours:'11~19시 / 금 휴무',
+    lat:35.4332323, lng:126.6968035, mapLat:35.428, mapLng:126.694, refundable:true, type:'food' },
 ];
 
 const ICONS = { food:'🍽️', spot:'🏛️', cafe:'☕', hotel:'🏨' };
 const DAY_COLORS = { 1:'#2563eb', 2:'#ea580c' };
 const MAX_REFUND = 140000;
-let map, currentTab=1, day1Layers, day2Layers, spending={};
+
+let PLACES, map, currentTab=1, day1Layers, day2Layers, spending={};
+let editMode=false, dragSrcIdx=null;
+
+function loadPlaces() {
+  const saved = localStorage.getItem('gc_order');
+  if(saved) { try { PLACES = JSON.parse(saved); return; } catch(e){} }
+  PLACES = JSON.parse(JSON.stringify(DEFAULT_PLACES));
+}
+function savePlaces() { localStorage.setItem('gc_order', JSON.stringify(PLACES)); }
 
 function init() {
+  loadPlaces();
   try { spending = JSON.parse(localStorage.getItem('gc_spend')||'{}'); } catch(e) { spending={}; }
   map = L.map('map',{zoomControl:false}).setView([35.46,126.65],11);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(map);
   L.control.zoom({position:'bottomright'}).addTo(map);
   day1Layers = L.layerGroup();
   day2Layers = L.layerGroup();
+  rebuildMap();
+  day1Layers.addTo(map);
+  switchTab(1);
+}
 
+function rebuildMap() {
+  day1Layers.clearLayers();
+  day2Layers.clearLayers();
   [1,2].forEach(day => {
     const dayPlaces = PLACES.filter(p=>p.day===day);
     const coords = [];
@@ -153,7 +198,7 @@ function init() {
           <div style="position:relative;">
             <div style="background:${color};width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,.3);border:2px solid #fff;">${emoji}</div>
             <div style="position:absolute;top:-6px;right:-8px;background:${color};color:#fff;font-size:8px;font-weight:800;min-width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid #fff;font-family:'Noto Sans KR';">${num}</div>
-            ${p.refundable ? '<div style="position:absolute;bottom:-3px;left:-6px;background:#16a34a;color:#fff;font-size:7px;width:13px;height:13px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid #fff;font-weight:800;">₩</div>' : ''}
+            ${p.refundable?'<div style="position:absolute;bottom:-3px;left:-6px;background:#16a34a;color:#fff;font-size:7px;width:13px;height:13px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid #fff;font-weight:800;">₩</div>':''}
           </div>
           <div style="margin-top:1px;font-size:9px;font-weight:700;color:#333;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff,0 0 3px #fff,1px 1px 2px #fff;white-space:nowrap;font-family:'Noto Sans KR';letter-spacing:-0.5px;">${p.name}</div>
         </div>`,
@@ -163,8 +208,8 @@ function init() {
         <div style="min-width:160px">
           <div style="font-weight:800;font-size:14px;margin-bottom:4px;">${num}. ${p.name}</div>
           <div style="font-size:12px;color:#666;margin-bottom:4px;">${p.menu}</div>
-          ${p.refundable ? '<div style="font-size:10px;background:#dcfce7;color:#16a34a;display:inline-block;padding:2px 8px;border-radius:10px;font-weight:800;margin-bottom:4px;">💰 환급 가능</div>' : ''}
-          ${p.phone ? `<div style="margin-top:4px;"><a href="tel:${p.phone.replace(/[^0-9\-+]/g,'')}" style="color:#2d5a3d;font-size:12px;font-weight:600;">📞 ${p.phone}</a></div>` : ''}
+          ${p.refundable?'<div style="font-size:10px;background:#dcfce7;color:#16a34a;display:inline-block;padding:2px 8px;border-radius:10px;font-weight:800;margin-bottom:4px;">💰 환급 가능</div>':''}
+          ${p.phone?`<div style="margin-top:4px;"><a href="tel:${p.phone.replace(/[^0-9\-+]/g,'')}" style="color:#2d5a3d;font-size:12px;font-weight:600;">📞 ${p.phone}</a></div>`:''}
         </div>
       `);
       if(day===1) day1Layers.addLayer(marker); else day2Layers.addLayer(marker);
@@ -173,19 +218,19 @@ function init() {
     const polyline = L.polyline(coords,{color:DAY_COLORS[day],weight:3,opacity:0.5,dashArray:'8,8'});
     if(day===1) day1Layers.addLayer(polyline); else day2Layers.addLayer(polyline);
   });
-  day1Layers.addTo(map);
-  switchTab(1);
 }
 
 function switchTab(tab) {
+  if(editMode) return;
   currentTab=tab;
   document.querySelectorAll('.tab').forEach(t=>t.className='tab');
   if(tab===1) document.getElementById('tab1').className='tab active-day1';
   else if(tab===2) document.getElementById('tab2').className='tab active-day2';
   else document.getElementById('tab3').className='tab active-budget';
   const mapEl=document.getElementById('map'),budgetBar=document.getElementById('budgetBar'),placeList=document.getElementById('placeList'),budgetPage=document.getElementById('budgetPage');
-  if(tab===3){mapEl.style.display='none';budgetBar.style.display='none';placeList.style.display='none';budgetPage.className='budget-page active';renderBudgetPage();return;}
-  mapEl.style.display='block';budgetBar.style.display='flex';placeList.style.display='block';budgetPage.className='budget-page';
+  const editToggle=document.getElementById('editToggle');
+  if(tab===3){mapEl.style.display='none';budgetBar.style.display='none';placeList.style.display='none';budgetPage.className='budget-page active';editToggle.style.display='none';renderBudgetPage();return;}
+  mapEl.style.display='block';budgetBar.style.display='flex';placeList.style.display='block';budgetPage.className='budget-page';editToggle.style.display='flex';
   map.invalidateSize();
   const dayPlaces=PLACES.filter(p=>p.day===tab);
   if(tab===1){if(!map.hasLayer(day1Layers))map.addLayer(day1Layers);if(map.hasLayer(day2Layers))map.removeLayer(day2Layers);}
@@ -199,17 +244,85 @@ function renderPlaceList(day) {
   let html='';
   places.forEach((p,i) => {
     const isFood=p.type==='food'||p.type==='cafe',spendVal=spending[p.id]||'';
+    const globalIdx = PLACES.indexOf(p);
     html+=`<div class="time-label"><div class="dot day${day}"></div><div class="time">${p.time}</div></div>
-      <div class="place-card ${p.refundable?'refundable':''}">
+      <div class="place-card ${p.refundable?'refundable':''} ${editMode?'editable':''}" draggable="${editMode}" data-idx="${globalIdx}"
+        ${editMode?`ontouchstart="handleTouchStart(event,${globalIdx})" ontouchmove="handleTouchMove(event)" ontouchend="handleTouchEnd(event,${globalIdx})"
+        ondragstart="dragStart(event,${globalIdx})" ondragover="dragOver(event)" ondrop="drop(event,${globalIdx})" ondragend="dragEnd(event)"`:''}>
+        ${editMode?'<div class="drag-handle">☰</div>':''}
         ${p.refundable?'<div class="badge">💰 환급</div>':''}
         <div class="name">${i+1}. ${p.name}</div>
         <div class="menu">${p.menu}</div>
         <div class="meta">${p.hours?`<span>🕐 ${p.hours}</span>`:''}${p.address?`<span>📍 ${p.address}</span>`:''}${p.note?`<span>💡 ${p.note}</span>`:''}</div>
-        ${p.phone?`<a class="phone-btn" href="tel:${p.phone.replace(/[^0-9\-+]/g,'')}">📞 ${p.phone}</a>`:''}
-        ${isFood?`<div class="spend-row"><label>💳 지출</label><input type="number" inputmode="numeric" placeholder="0" value="${spendVal}" onchange="updateSpend('${p.id}',this.value)" onfocus="this.select()"><span class="won">원</span></div>`:''}
+        ${!editMode&&p.phone?`<a class="phone-btn" href="tel:${p.phone.replace(/[^0-9\-+]/g,'')}">📞 ${p.phone}</a>`:''}
+        ${!editMode&&isFood?`<div class="spend-row"><label>💳 지출</label><input type="number" inputmode="numeric" placeholder="0" value="${spendVal}" onchange="updateSpend('${p.id}',this.value)" onfocus="this.select()"><span class="won">원</span></div>`:''}
       </div>`;
   });
   list.innerHTML=html;
+}
+
+// Drag & drop (desktop)
+function dragStart(e,idx) { dragSrcIdx=idx; e.dataTransfer.effectAllowed='move'; e.target.classList.add('dragging'); }
+function dragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect='move'; }
+function drop(e,targetIdx) {
+  e.preventDefault();
+  if(dragSrcIdx===null||dragSrcIdx===targetIdx) return;
+  if(PLACES[dragSrcIdx].day!==PLACES[targetIdx].day) return;
+  const item=PLACES.splice(dragSrcIdx,1)[0];
+  PLACES.splice(targetIdx,0,item);
+  renderPlaceList(currentTab);
+  rebuildMap();
+}
+function dragEnd(e) { e.target.classList.remove('dragging'); dragSrcIdx=null; }
+
+// Touch drag (mobile)
+let touchStartY=0, touchIdx=null, touchEl=null;
+function handleTouchStart(e,idx) {
+  touchIdx=idx; touchStartY=e.touches[0].clientY;
+  touchEl=e.currentTarget; touchEl.classList.add('dragging');
+}
+function handleTouchMove(e) { e.preventDefault(); }
+function handleTouchEnd(e,idx) {
+  if(touchEl) touchEl.classList.remove('dragging');
+  const endY=e.changedTouches[0].clientY;
+  const diff=endY-touchStartY;
+  if(Math.abs(diff)<30) { touchIdx=null; return; }
+  const day=PLACES[touchIdx].day;
+  const dayPlaces=PLACES.filter(p=>p.day===day);
+  const localIdx=dayPlaces.indexOf(PLACES[touchIdx]);
+  let newLocalIdx=diff<0?Math.max(0,localIdx-1):Math.min(dayPlaces.length-1,localIdx+1);
+  if(newLocalIdx===localIdx) { touchIdx=null; return; }
+  const targetGlobalIdx=PLACES.indexOf(dayPlaces[newLocalIdx]);
+  const item=PLACES.splice(touchIdx,1)[0];
+  const insertAt=targetGlobalIdx>touchIdx?targetGlobalIdx:targetGlobalIdx;
+  PLACES.splice(insertAt,0,item);
+  renderPlaceList(currentTab);
+  rebuildMap();
+  touchIdx=null;
+}
+
+function toggleEdit() {
+  editMode=!editMode;
+  document.getElementById('editBar').className=editMode?'edit-bar active':'edit-bar';
+  document.getElementById('editToggle').innerHTML=editMode?'✕':'✏️';
+  renderPlaceList(currentTab);
+}
+function cancelEdit() {
+  loadPlaces();
+  editMode=false;
+  document.getElementById('editBar').className='edit-bar';
+  document.getElementById('editToggle').innerHTML='✏️';
+  rebuildMap();
+  renderPlaceList(currentTab);
+}
+function saveEdit() {
+  savePlaces();
+  editMode=false;
+  document.getElementById('editBar').className='edit-bar';
+  document.getElementById('editToggle').innerHTML='✏️';
+  rebuildMap();
+  renderPlaceList(currentTab);
+  updateBudgetBar();
 }
 
 function updateSpend(id,val){const num=parseInt(val)||0;if(num>0)spending[id]=num;else delete spending[id];localStorage.setItem('gc_spend',JSON.stringify(spending));updateBudgetBar();}
@@ -252,7 +365,10 @@ function renderBudgetPage(){
       <div class="budget-row"><div class="label">예상 환급 (70%, 최대 14만)</div><div class="value" style="color:#16a34a">${Math.round(expectedRefund).toLocaleString()}원</div></div>
       <div class="budget-row"><div class="label">실질 식비 (총-환급)</div><div class="value">${(totalAll-Math.round(expectedRefund)).toLocaleString()}원</div></div>
     </div>
-    <div style="text-align:center;padding:16px;"><button onclick="if(confirm('모든 지출 기록을 초기화할까요?')){spending={};localStorage.removeItem('gc_spend');switchTab(3);}" style="background:none;border:1px solid #ccc;border-radius:8px;padding:8px 20px;font-size:12px;color:#999;cursor:pointer;font-family:'Noto Sans KR';">지출 기록 초기화</button></div>`;
+    <div style="text-align:center;padding:16px;">
+      <button onclick="if(confirm('모든 지출 기록을 초기화할까요?')){spending={};localStorage.removeItem('gc_spend');switchTab(3);}" style="background:none;border:1px solid #ccc;border-radius:8px;padding:8px 20px;font-size:12px;color:#999;cursor:pointer;font-family:'Noto Sans KR';">지출 기록 초기화</button>
+      <button onclick="if(confirm('순서를 기본값으로 되돌릴까요?')){localStorage.removeItem('gc_order');loadPlaces();rebuildMap();switchTab(1);}" style="background:none;border:1px solid #ccc;border-radius:8px;padding:8px 20px;font-size:12px;color:#999;cursor:pointer;font-family:'Noto Sans KR';margin-top:8px;">순서 초기화</button>
+    </div>`;
 }
 document.addEventListener('DOMContentLoaded',init);
 </script>
