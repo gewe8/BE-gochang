@@ -27,25 +27,13 @@ body { font-family:'Noto Sans KR',sans-serif; background:#f5f0eb; color:#2d2a26;
 .budget-info .title { font-size:11px; color:#888; }
 .budget-info .amount { font-size:18px; font-weight:800; color:#2d2a26; }
 .budget-info .detail { font-size:11px; color:#16a34a; margin-top:2px; }
-.place-list { padding:0 16px 100px; }
-
-/* Edit mode bar */
-.edit-bar { display:none; background:#fff3cd; padding:10px 16px; align-items:center; justify-content:space-between; border-bottom:1px solid #e8e2da; }
-.edit-bar.active { display:flex; }
-.edit-bar span { font-size:12px; color:#856404; font-weight:600; }
-.edit-bar button { padding:6px 16px; border-radius:8px; font-size:12px; font-weight:700; border:none; cursor:pointer; font-family:'Noto Sans KR'; }
-.edit-bar .save-btn { background:#2d5a3d; color:#fff; }
-.edit-bar .cancel-btn { background:#e8e2da; color:#666; margin-right:8px; }
-
-.edit-toggle { position:fixed; bottom:20px; right:20px; background:#2d5a3d; color:#fff; border:none; width:50px; height:50px; border-radius:50%; font-size:20px; box-shadow:0 4px 12px rgba(0,0,0,.2); cursor:pointer; z-index:1000; display:flex; align-items:center; justify-content:center; }
-.edit-toggle:active { background:#1a3a2a; }
-
-.time-label { display:flex; align-items:center; gap:8px; padding:16px 0 8px; }
+.place-list { padding:0 16px 80px; }
+.time-label { display:flex; align-items:center; gap:8px; padding:16px 0 4px; }
 .time-label .dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
 .time-label .dot.day1 { background:#2563eb; }
 .time-label .dot.day2 { background:#ea580c; }
 .time-label .time { font-size:12px; font-weight:600; color:#888; }
-
+.time-label .travel { font-size:10px; color:#bbb; margin-left:auto; }
 .place-card { background:#fff; border-radius:14px; padding:16px; margin-bottom:10px; box-shadow:0 1px 4px rgba(0,0,0,.06); position:relative; overflow:hidden; transition:transform .15s, box-shadow .15s; }
 .place-card.refundable { border-left:4px solid #16a34a; }
 .place-card.dragging { opacity:0.5; transform:scale(0.97); box-shadow:0 4px 16px rgba(0,0,0,.15); }
@@ -64,6 +52,16 @@ body { font-family:'Noto Sans KR',sans-serif; background:#f5f0eb; color:#2d2a26;
 .spend-row input { width:100px; border:1.5px solid #d4cfc7; border-radius:8px; padding:6px 10px; font-size:14px; font-family:'Noto Sans KR'; text-align:right; outline:none; }
 .spend-row input:focus { border-color:#2d5a3d; }
 .spend-row .won { font-size:13px; color:#666; }
+
+/* Edit footer - 하단 고정, 스크롤 올리면 숨김 */
+.edit-footer { position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid #e8e2da; padding:10px 16px; display:flex; align-items:center; justify-content:flex-end; gap:8px; z-index:998; transition:transform .3s; }
+.edit-footer.hidden { transform:translateY(100%); }
+.edit-footer .edit-btn { background:#f5f0eb; color:#666; border:1px solid #d4cfc7; padding:8px 16px; border-radius:10px; font-size:12px; font-weight:600; cursor:pointer; font-family:'Noto Sans KR'; }
+.edit-footer .edit-btn:active { background:#e8e2da; }
+.edit-footer .save-btn { background:#2d5a3d; color:#fff; border:none; padding:8px 16px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer; font-family:'Noto Sans KR'; }
+.edit-footer .cancel-btn { background:#e8e2da; color:#666; border:none; padding:8px 16px; border-radius:10px; font-size:12px; font-weight:600; cursor:pointer; font-family:'Noto Sans KR'; }
+.edit-footer .editing-label { font-size:11px; color:#856404; margin-right:auto; }
+
 .budget-page { padding:16px; display:none; }
 .budget-page.active { display:block; }
 .budget-section { background:#fff; border-radius:14px; padding:20px; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
@@ -90,13 +88,6 @@ body { font-family:'Noto Sans KR',sans-serif; background:#f5f0eb; color:#2d2a26;
   <div class="tab" id="tab2" onclick="switchTab(2)">2일차 (월)</div>
   <div class="tab" id="tab3" onclick="switchTab(3)">💰 지출</div>
 </div>
-<div class="edit-bar" id="editBar">
-  <span>✏️ 순서 편집 중 — 길게 눌러서 드래그</span>
-  <div>
-    <button class="cancel-btn" onclick="cancelEdit()">취소</button>
-    <button class="save-btn" onclick="saveEdit()">저장</button>
-  </div>
-</div>
 <div id="map"></div>
 <div class="budget-bar" id="budgetBar">
   <div class="budget-ring">
@@ -114,46 +105,130 @@ body { font-family:'Noto Sans KR',sans-serif; background:#f5f0eb; color:#2d2a26;
 </div>
 <div class="place-list" id="placeList"></div>
 <div class="budget-page" id="budgetPage"></div>
-<button class="edit-toggle" id="editToggle" onclick="toggleEdit()">✏️</button>
+<div class="edit-footer" id="editFooter">
+  <button class="edit-btn" id="editBtn" onclick="toggleEdit()">✏️ 동선 수정</button>
+</div>
 
 <script>
+// duration: 체류 분, travelAfter: 다음 장소까지 이동 분
 const DEFAULT_PLACES = [
-  // === Day 1: 수궁회관→선운사→호텔→조양관→금단양만→청보리밭→읍성→순두부→온천 ===
-  { id:'sugung', day:1, time:'11:00', name:'수궁회관', menu:'간장게장 + 바지락비빔밥', phone:'네이버 검색', hours:'확인 필요',
-    lat:35.536, lng:126.554, mapLat:35.536, mapLng:126.554, refundable:true, type:'food', address:'심원면 심원로 218' },
-  { id:'seonunsa_d1', day:1, time:'12:00', name:'선운사', menu:'산책 약 1시간 (입장 3,000원)', phone:'063-561-1422', hours:'09~17시',
-    lat:35.4969385, lng:126.57822549, mapLat:35.495, mapLng:126.578, refundable:false, type:'spot' },
-  { id:'hotel_in', day:1, time:'13:30', name:'웰파크호텔', menu:'체크인 · 짐 풀기', phone:'063-560-3333', hours:'체크인15시/체크아웃11시',
-    lat:35.4314742, lng:126.74183610, mapLat:35.438, mapLng:126.745, refundable:false, type:'hotel' },
-  { id:'joyang', day:1, time:'14:00', name:'조양관카페', menu:'감성 카페 · 읍성 근처', phone:'010-2198-9421', hours:'10:30~21:00',
-    lat:35.4337237, lng:126.70138469, mapLat:35.445, mapLng:126.718, refundable:false, type:'cafe' },
-  { id:'geumdan', day:1, time:'15:00', name:'금단양만', menu:'민물장어 셀프구이 (1kg 66,000원)', phone:'063-563-5125', hours:'10:30~21:00',
-    lat:35.5365263, lng:126.55429459, mapLat:35.545, mapLng:126.562, refundable:false, type:'food' },
-  { id:'barley', day:1, time:'16:30', name:'청보리밭', menu:'축제 중 · 유채꽃 · 노을 타임!', phone:'063-564-9897', hours:'상시(일몰추천)',
-    lat:35.3766234, lng:126.54189889, mapLat:35.3766, mapLng:126.542, refundable:false, type:'spot', note:'주차 1만원→상품권 환급' },
-  { id:'eupseong', day:1, time:'18:30', name:'고창읍성', menu:'철쭉 산책 · 석양 뷰', phone:'063-560-8067', hours:'09~22시',
-    lat:35.4308877, lng:126.70447619, mapLat:35.425, mapLng:126.700, refundable:false, type:'spot' },
-  { id:'sundubu', day:1, time:'19:10', name:'모양성순두부', menu:'빨간순두부 · 하얀순두부(바지락)', phone:'063-564-0337', hours:'일 09~21시 / 월 휴무',
-    lat:35.4331867, lng:126.7065134, mapLat:35.440, mapLng:126.690, refundable:true, type:'food' },
-  { id:'oncheon1', day:1, time:'19:50', name:'호텔 온천', menu:'석정온천 (투숙객 6,000원)', phone:'063-560-3333', hours:'주말~21시',
-    lat:35.4314742, lng:126.74183610, mapLat:35.425, mapLng:126.748, refundable:false, type:'hotel' },
+  // === Day 1 ===
+  { id:'sugung', day:1, startH:11, startM:0, name:'수궁회관', menu:'간장게장 + 바지락비빔밥', phone:'네이버 검색', hours:'확인 필요',
+    lat:35.536, lng:126.554, mapLat:35.536, mapLng:126.554, refundable:true, type:'food', address:'심원면 심원로 218',
+    duration:50, travelAfter:20 },
+  { id:'seonunsa_d1', day:1, startH:12, startM:0, name:'선운사', menu:'산책 약 1시간 (입장 3,000원)', phone:'063-561-1422', hours:'09~17시',
+    lat:35.4969385, lng:126.57822549, mapLat:35.495, mapLng:126.578, refundable:false, type:'spot',
+    duration:60, travelAfter:20 },
+  { id:'hotel_in', day:1, startH:13, startM:30, name:'웰파크호텔', menu:'체크인 · 짐 풀기', phone:'063-560-3333', hours:'체크인15시/체크아웃11시',
+    lat:35.4314742, lng:126.74183610, mapLat:35.438, mapLng:126.745, refundable:false, type:'hotel',
+    duration:20, travelAfter:5 },
+  { id:'joyang', day:1, startH:14, startM:0, name:'조양관카페', menu:'감성 카페 · 읍성 근처', phone:'010-2198-9421', hours:'10:30~21:00',
+    lat:35.4337237, lng:126.70138469, mapLat:35.445, mapLng:126.718, refundable:false, type:'cafe',
+    duration:40, travelAfter:25 },
+  { id:'geumdan', day:1, startH:15, startM:0, name:'금단양만', menu:'민물장어 셀프구이 (1kg 66,000원)', phone:'063-563-5125', hours:'10:30~21:00',
+    lat:35.5365263, lng:126.55429459, mapLat:35.545, mapLng:126.562, refundable:false, type:'food',
+    duration:60, travelAfter:25 },
+  { id:'barley', day:1, startH:16, startM:30, name:'청보리밭', menu:'축제 중 · 유채꽃 · 노을 타임!', phone:'063-564-9897', hours:'상시(일몰추천)',
+    lat:35.3766234, lng:126.54189889, mapLat:35.3766, mapLng:126.542, refundable:false, type:'spot', note:'주차 1만원→상품권 환급',
+    duration:80, travelAfter:35 },
+  { id:'eupseong', day:1, startH:18, startM:30, name:'고창읍성', menu:'철쭉 산책 · 석양 뷰', phone:'063-560-8067', hours:'09~22시',
+    lat:35.4308877, lng:126.70447619, mapLat:35.425, mapLng:126.700, refundable:false, type:'spot',
+    duration:30, travelAfter:5 },
+  { id:'sundubu', day:1, startH:19, startM:10, name:'모양성순두부', menu:'빨간순두부 · 하얀순두부(바지락)', phone:'063-564-0337', hours:'일 09~21시 / 월 휴무',
+    lat:35.4331867, lng:126.7065134, mapLat:35.440, mapLng:126.690, refundable:true, type:'food',
+    duration:35, travelAfter:5 },
+  { id:'oncheon1', day:1, startH:19, startM:50, name:'호텔 온천', menu:'석정온천 (투숙객 6,000원)', phone:'063-560-3333', hours:'주말~21시',
+    lat:35.4314742, lng:126.74183610, mapLat:35.425, mapLng:126.748, refundable:false, type:'hotel',
+    duration:60, travelAfter:0 },
 
   // === Day 2 ===
-  { id:'oncheon2', day:2, time:'07:00', name:'아침온천', menu:'석정온천', phone:'', hours:'06시 오픈',
-    lat:35.4314742, lng:126.74183610, mapLat:35.435, mapLng:126.750, refundable:false, type:'hotel' },
-  { id:'checkout', day:2, time:'09:00', name:'체크아웃', menu:'짐 트렁크에', phone:'', hours:'',
-    lat:35.4314742, lng:126.74183610, mapLat:35.425, mapLng:126.745, refundable:false, type:'hotel' },
-  { id:'mungchi', day:2, time:'09:30', name:'뭉치네', menu:'산채비빔밥 · 파전', phone:'063-562-5878', hours:'11~21시',
-    lat:35.504, lng:126.597, mapLat:35.510, mapLng:126.600, refundable:true, type:'food' },
-  { id:'seonunsa', day:2, time:'10:30', name:'선운사', menu:'산책 약 1시간 (입장 3,000원)', phone:'063-561-1422', hours:'09~17시',
-    lat:35.4969385, lng:126.57822549, mapLat:35.498, mapLng:126.580, refundable:false, type:'spot' },
-  { id:'yeondawon', day:2, time:'12:00', name:'연다원', menu:'녹차밭+저수지 뷰 · 크루아상', phone:'063-561-4443', hours:'월 영업 확인 필요',
-    lat:35.4914574, lng:126.62796700, mapLat:35.491, mapLng:126.628, refundable:false, type:'cafe' },
-  { id:'myeonok', day:2, time:'13:30', name:'고창면옥', menu:'냉면 · 갈비탕 · 만두', phone:'063-561-1007', hours:'11~20시 연중무휴',
-    lat:35.4308985, lng:126.72698039, mapLat:35.438, mapLng:126.727, refundable:false, type:'food' },
-  { id:'narae', day:2, time:'15:00', name:'나래궁', menu:'짬짜면 · 전통시장', phone:'063-561-0957', hours:'11~19시 / 금 휴무',
-    lat:35.4332323, lng:126.6968035, mapLat:35.428, mapLng:126.694, refundable:true, type:'food' },
+  { id:'oncheon2', day:2, startH:7, startM:0, name:'아침온천', menu:'석정온천', phone:'', hours:'06시 오픈',
+    lat:35.4314742, lng:126.74183610, mapLat:35.435, mapLng:126.750, refundable:false, type:'hotel',
+    duration:90, travelAfter:0 },
+  { id:'checkout', day:2, startH:9, startM:0, name:'체크아웃', menu:'짐 트렁크에', phone:'', hours:'',
+    lat:35.4314742, lng:126.74183610, mapLat:35.425, mapLng:126.745, refundable:false, type:'hotel',
+    duration:10, travelAfter:20 },
+  { id:'mungchi', day:2, startH:9, startM:30, name:'뭉치네', menu:'산채비빔밥 · 파전', phone:'063-562-5878', hours:'11~21시',
+    lat:35.504, lng:126.597, mapLat:35.510, mapLng:126.600, refundable:true, type:'food',
+    duration:40, travelAfter:5 },
+  { id:'seonunsa', day:2, startH:10, startM:30, name:'선운사', menu:'산책 약 1시간 (입장 3,000원)', phone:'063-561-1422', hours:'09~17시',
+    lat:35.4969385, lng:126.57822549, mapLat:35.498, mapLng:126.580, refundable:false, type:'spot',
+    duration:60, travelAfter:10 },
+  { id:'yeondawon', day:2, startH:12, startM:0, name:'연다원', menu:'녹차밭+저수지 뷰 · 크루아상', phone:'063-561-4443', hours:'월 영업 확인 필요',
+    lat:35.4914574, lng:126.62796700, mapLat:35.491, mapLng:126.628, refundable:false, type:'cafe',
+    duration:40, travelAfter:20 },
+  { id:'myeonok', day:2, startH:13, startM:30, name:'고창면옥', menu:'냉면 · 갈비탕 · 만두', phone:'063-561-1007', hours:'11~20시 연중무휴',
+    lat:35.4308985, lng:126.72698039, mapLat:35.438, mapLng:126.727, refundable:false, type:'food',
+    duration:50, travelAfter:5 },
+  { id:'narae', day:2, startH:15, startM:0, name:'나래궁', menu:'짬짜면 · 전통시장', phone:'063-561-0957', hours:'11~19시 / 금 휴무',
+    lat:35.4332323, lng:126.6968035, mapLat:35.428, mapLng:126.694, refundable:true, type:'food',
+    duration:40, travelAfter:0 },
 ];
+
+// 장소 간 이동시간 매트릭스 (id→id, 분)
+const TRAVEL = {
+  'sugung→seonunsa_d1':20,'seonunsa_d1→sugung':20,
+  'sugung→hotel_in':25,'hotel_in→sugung':25,
+  'sugung→geumdan':5,'geumdan→sugung':5,
+  'sugung→barley':35,'barley→sugung':35,
+  'seonunsa_d1→hotel_in':20,'hotel_in→seonunsa_d1':20,
+  'seonunsa_d1→joyang':25,'joyang→seonunsa_d1':25,
+  'hotel_in→joyang':5,'joyang→hotel_in':5,
+  'hotel_in→eupseong':5,'eupseong→hotel_in':5,
+  'hotel_in→sundubu':5,'sundubu→hotel_in':5,
+  'hotel_in→oncheon1':0,'oncheon1→hotel_in':0,
+  'joyang→geumdan':25,'geumdan→joyang':25,
+  'joyang→eupseong':3,'eupseong→joyang':3,
+  'joyang→sundubu':3,'sundubu→joyang':3,
+  'geumdan→barley':25,'barley→geumdan':25,
+  'geumdan→seonunsa_d1':15,'seonunsa_d1→geumdan':15,
+  'barley→eupseong':35,'eupseong→barley':35,
+  'barley→hotel_in':40,'hotel_in→barley':40,
+  'eupseong→sundubu':3,'sundubu→eupseong':3,
+  'sundubu→oncheon1':5,'oncheon1→sundubu':5,
+  'eupseong→oncheon1':5,'oncheon1→eupseong':5,
+  // Day 2
+  'oncheon2→checkout':0,'checkout→oncheon2':0,
+  'checkout→mungchi':20,'mungchi→checkout':20,
+  'mungchi→seonunsa':5,'seonunsa→mungchi':5,
+  'seonunsa→yeondawon':10,'yeondawon→seonunsa':10,
+  'yeondawon→myeonok':20,'myeonok→yeondawon':20,
+  'myeonok→narae':5,'narae→myeonok':5,
+  'checkout→seonunsa':20,'seonunsa→checkout':20,
+  'checkout→yeondawon':25,'yeondawon→checkout':25,
+  'mungchi→yeondawon':15,'yeondawon→mungchi':15,
+  'mungchi→myeonok':25,'myeonok→mungchi':25,
+  'seonunsa→myeonok':25,'myeonok→seonunsa':25,
+  'seonunsa→narae':25,'narae→seonunsa':25,
+  'yeondawon→narae':15,'narae→yeondawon':15,
+};
+
+function getTravelMin(fromId, toId) {
+  return TRAVEL[fromId+'→'+toId] || 15; // 모르면 15분 기본
+}
+
+function recalcTimes(places) {
+  [1,2].forEach(day => {
+    const dp = places.filter(p=>p.day===day);
+    if(dp.length===0) return;
+    // 첫 장소는 원래 시간 유지
+    let curMin = dp[0].startH*60 + dp[0].startM;
+    dp[0]._calcTime = formatTime(curMin);
+    dp[0]._travelAfter = null;
+    for(let i=1; i<dp.length; i++) {
+      const prev = dp[i-1];
+      const travel = getTravelMin(prev.id, dp[i].id);
+      curMin += prev.duration + travel;
+      dp[i]._calcTime = formatTime(curMin);
+      dp[i]._travelBefore = travel;
+    }
+  });
+}
+
+function formatTime(totalMin) {
+  const h = Math.floor(totalMin/60), m = totalMin%60;
+  return `${h}:${m.toString().padStart(2,'0')}`;
+}
 
 const ICONS = { food:'🍽️', spot:'🏛️', cafe:'☕', hotel:'🏨' };
 const DAY_COLORS = { 1:'#2563eb', 2:'#ea580c' };
@@ -161,6 +236,7 @@ const MAX_REFUND = 140000;
 
 let PLACES, map, currentTab=1, day1Layers, day2Layers, spending={};
 let editMode=false, dragSrcIdx=null;
+let lastScrollY=0;
 
 function loadPlaces() {
   const saved = localStorage.getItem('gc_order');
@@ -177,9 +253,20 @@ function init() {
   L.control.zoom({position:'bottomright'}).addTo(map);
   day1Layers = L.layerGroup();
   day2Layers = L.layerGroup();
+  recalcTimes(PLACES);
   rebuildMap();
   day1Layers.addTo(map);
   switchTab(1);
+
+  // 스크롤 감지: 아래로 스크롤하면 edit footer 숨김
+  window.addEventListener('scroll', () => {
+    const footer = document.getElementById('editFooter');
+    if(editMode) { footer.classList.remove('hidden'); return; }
+    const curY = window.scrollY;
+    if(curY > lastScrollY + 10) footer.classList.add('hidden');
+    else if(curY < lastScrollY - 10) footer.classList.remove('hidden');
+    lastScrollY = curY;
+  });
 }
 
 function rebuildMap() {
@@ -228,9 +315,9 @@ function switchTab(tab) {
   else if(tab===2) document.getElementById('tab2').className='tab active-day2';
   else document.getElementById('tab3').className='tab active-budget';
   const mapEl=document.getElementById('map'),budgetBar=document.getElementById('budgetBar'),placeList=document.getElementById('placeList'),budgetPage=document.getElementById('budgetPage');
-  const editToggle=document.getElementById('editToggle');
-  if(tab===3){mapEl.style.display='none';budgetBar.style.display='none';placeList.style.display='none';budgetPage.className='budget-page active';editToggle.style.display='none';renderBudgetPage();return;}
-  mapEl.style.display='block';budgetBar.style.display='flex';placeList.style.display='block';budgetPage.className='budget-page';editToggle.style.display='flex';
+  const editFooter=document.getElementById('editFooter');
+  if(tab===3){mapEl.style.display='none';budgetBar.style.display='none';placeList.style.display='none';budgetPage.className='budget-page active';editFooter.style.display='none';renderBudgetPage();return;}
+  mapEl.style.display='block';budgetBar.style.display='flex';placeList.style.display='block';budgetPage.className='budget-page';editFooter.style.display='flex';
   map.invalidateSize();
   const dayPlaces=PLACES.filter(p=>p.day===tab);
   if(tab===1){if(!map.hasLayer(day1Layers))map.addLayer(day1Layers);if(map.hasLayer(day2Layers))map.removeLayer(day2Layers);}
@@ -240,15 +327,18 @@ function switchTab(tab) {
 }
 
 function renderPlaceList(day) {
+  recalcTimes(PLACES);
   const list=document.getElementById('placeList'),places=PLACES.filter(p=>p.day===day);
   let html='';
   places.forEach((p,i) => {
     const isFood=p.type==='food'||p.type==='cafe',spendVal=spending[p.id]||'';
     const globalIdx = PLACES.indexOf(p);
-    html+=`<div class="time-label"><div class="dot day${day}"></div><div class="time">${p.time}</div></div>
+    const timeStr = p._calcTime || p.time;
+    const travelStr = (i>0 && p._travelBefore) ? `🚗 ${p._travelBefore}분` : '';
+    html+=`<div class="time-label"><div class="dot day${day}"></div><div class="time">${timeStr}</div>${travelStr?`<div class="travel">${travelStr}</div>`:''}</div>
       <div class="place-card ${p.refundable?'refundable':''} ${editMode?'editable':''}" draggable="${editMode}" data-idx="${globalIdx}"
-        ${editMode?`ontouchstart="handleTouchStart(event,${globalIdx})" ontouchmove="handleTouchMove(event)" ontouchend="handleTouchEnd(event,${globalIdx})"
-        ondragstart="dragStart(event,${globalIdx})" ondragover="dragOver(event)" ondrop="drop(event,${globalIdx})" ondragend="dragEnd(event)"`:''}>
+        ${editMode?`ondragstart="dragStart(event,${globalIdx})" ondragover="dragOver(event)" ondrop="drop(event,${globalIdx})" ondragend="dragEnd(event)"
+        ontouchstart="tStart(event,${globalIdx})" ontouchmove="tMove(event)" ontouchend="tEnd(event,${globalIdx})"`:''}>
         ${editMode?'<div class="drag-handle">☰</div>':''}
         ${p.refundable?'<div class="badge">💰 환급</div>':''}
         <div class="name">${i+1}. ${p.name}</div>
@@ -261,68 +351,65 @@ function renderPlaceList(day) {
   list.innerHTML=html;
 }
 
-// Drag & drop (desktop)
-function dragStart(e,idx) { dragSrcIdx=idx; e.dataTransfer.effectAllowed='move'; e.target.classList.add('dragging'); }
-function dragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect='move'; }
-function drop(e,targetIdx) {
+// Desktop drag
+function dragStart(e,idx){dragSrcIdx=idx;e.dataTransfer.effectAllowed='move';e.target.classList.add('dragging');}
+function dragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';}
+function drop(e,targetIdx){
   e.preventDefault();
   if(dragSrcIdx===null||dragSrcIdx===targetIdx) return;
   if(PLACES[dragSrcIdx].day!==PLACES[targetIdx].day) return;
   const item=PLACES.splice(dragSrcIdx,1)[0];
   PLACES.splice(targetIdx,0,item);
+  recalcTimes(PLACES);
   renderPlaceList(currentTab);
   rebuildMap();
 }
-function dragEnd(e) { e.target.classList.remove('dragging'); dragSrcIdx=null; }
+function dragEnd(e){e.target.classList.remove('dragging');dragSrcIdx=null;}
 
-// Touch drag (mobile)
-let touchStartY=0, touchIdx=null, touchEl=null;
-function handleTouchStart(e,idx) {
-  touchIdx=idx; touchStartY=e.touches[0].clientY;
-  touchEl=e.currentTarget; touchEl.classList.add('dragging');
-}
-function handleTouchMove(e) { e.preventDefault(); }
-function handleTouchEnd(e,idx) {
-  if(touchEl) touchEl.classList.remove('dragging');
-  const endY=e.changedTouches[0].clientY;
-  const diff=endY-touchStartY;
-  if(Math.abs(diff)<30) { touchIdx=null; return; }
-  const day=PLACES[touchIdx].day;
-  const dayPlaces=PLACES.filter(p=>p.day===day);
-  const localIdx=dayPlaces.indexOf(PLACES[touchIdx]);
-  let newLocalIdx=diff<0?Math.max(0,localIdx-1):Math.min(dayPlaces.length-1,localIdx+1);
-  if(newLocalIdx===localIdx) { touchIdx=null; return; }
-  const targetGlobalIdx=PLACES.indexOf(dayPlaces[newLocalIdx]);
-  const item=PLACES.splice(touchIdx,1)[0];
-  const insertAt=targetGlobalIdx>touchIdx?targetGlobalIdx:targetGlobalIdx;
-  PLACES.splice(insertAt,0,item);
+// Mobile touch
+let tY=0,tI=null,tE=null;
+function tStart(e,idx){tI=idx;tY=e.touches[0].clientY;tE=e.currentTarget;tE.classList.add('dragging');}
+function tMove(e){e.preventDefault();}
+function tEnd(e,idx){
+  if(tE)tE.classList.remove('dragging');
+  const diff=e.changedTouches[0].clientY-tY;
+  if(Math.abs(diff)<30){tI=null;return;}
+  const day=PLACES[tI].day;
+  const dp=PLACES.filter(p=>p.day===day);
+  const li=dp.indexOf(PLACES[tI]);
+  const ni=diff<0?Math.max(0,li-1):Math.min(dp.length-1,li+1);
+  if(ni===li){tI=null;return;}
+  const ti=PLACES.indexOf(dp[ni]);
+  const item=PLACES.splice(tI,1)[0];
+  PLACES.splice(ti,0,item);
+  recalcTimes(PLACES);
   renderPlaceList(currentTab);
   rebuildMap();
-  touchIdx=null;
+  tI=null;
 }
 
 function toggleEdit() {
   editMode=!editMode;
-  document.getElementById('editBar').className=editMode?'edit-bar active':'edit-bar';
-  document.getElementById('editToggle').innerHTML=editMode?'✕':'✏️';
+  const footer=document.getElementById('editFooter');
+  if(editMode) {
+    footer.innerHTML=`<span class="editing-label">✏️ 길게 눌러 드래그</span><button class="cancel-btn" onclick="cancelEdit()">취소</button><button class="save-btn" onclick="saveEdit()">저장</button>`;
+    footer.classList.remove('hidden');
+  } else {
+    footer.innerHTML=`<button class="edit-btn" onclick="toggleEdit()">✏️ 동선 수정</button>`;
+  }
   renderPlaceList(currentTab);
 }
 function cancelEdit() {
-  loadPlaces();
-  editMode=false;
-  document.getElementById('editBar').className='edit-bar';
-  document.getElementById('editToggle').innerHTML='✏️';
-  rebuildMap();
-  renderPlaceList(currentTab);
+  loadPlaces(); editMode=false;
+  const footer=document.getElementById('editFooter');
+  footer.innerHTML=`<button class="edit-btn" onclick="toggleEdit()">✏️ 동선 수정</button>`;
+  recalcTimes(PLACES); rebuildMap(); renderPlaceList(currentTab);
 }
 function saveEdit() {
-  savePlaces();
-  editMode=false;
-  document.getElementById('editBar').className='edit-bar';
-  document.getElementById('editToggle').innerHTML='✏️';
-  rebuildMap();
-  renderPlaceList(currentTab);
-  updateBudgetBar();
+  savePlaces(); editMode=false;
+  const footer=document.getElementById('editFooter');
+  footer.innerHTML=`<button class="edit-btn" onclick="toggleEdit()">✏️ 동선 수정</button>`;
+  recalcTimes(PLACES); rebuildMap(); renderPlaceList(currentTab); updateBudgetBar();
 }
 
 function updateSpend(id,val){const num=parseInt(val)||0;if(num>0)spending[id]=num;else delete spending[id];localStorage.setItem('gc_spend',JSON.stringify(spending));updateBudgetBar();}
@@ -367,7 +454,7 @@ function renderBudgetPage(){
     </div>
     <div style="text-align:center;padding:16px;">
       <button onclick="if(confirm('모든 지출 기록을 초기화할까요?')){spending={};localStorage.removeItem('gc_spend');switchTab(3);}" style="background:none;border:1px solid #ccc;border-radius:8px;padding:8px 20px;font-size:12px;color:#999;cursor:pointer;font-family:'Noto Sans KR';">지출 기록 초기화</button>
-      <button onclick="if(confirm('순서를 기본값으로 되돌릴까요?')){localStorage.removeItem('gc_order');loadPlaces();rebuildMap();switchTab(1);}" style="background:none;border:1px solid #ccc;border-radius:8px;padding:8px 20px;font-size:12px;color:#999;cursor:pointer;font-family:'Noto Sans KR';margin-top:8px;">순서 초기화</button>
+      <button onclick="if(confirm('순서를 기본값으로 되돌릴까요?')){localStorage.removeItem('gc_order');loadPlaces();recalcTimes(PLACES);rebuildMap();switchTab(1);}" style="background:none;border:1px solid #ccc;border-radius:8px;padding:8px 20px;font-size:12px;color:#999;cursor:pointer;font-family:'Noto Sans KR';margin-top:8px;">순서 초기화</button>
     </div>`;
 }
 document.addEventListener('DOMContentLoaded',init);
