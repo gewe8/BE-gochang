@@ -33,8 +33,8 @@ const DEFAULT_PLACES = [
   // === Day 1: 고창 ===
   {id:'sugung',day:1,startH:11,startM:0,name:'수궁회관',menu:'간장게장 + 바지락비빔밥',phone:'063-564-5035',hours:'매일 10~21시',lat:35.536,lng:126.554,mapLat:35.536,mapLng:126.554,refundable:true,type:'food',address:'심원면 심원로 218',duration:50,travelAfter:20},
   {id:'seonunsa_d1',day:1,startH:12,startM:0,name:'선운사',menu:'산책 약 1시간 (입장 3,000원)',phone:'063-561-1422',hours:'09~17시',lat:35.497,lng:126.578,mapLat:35.495,mapLng:126.578,refundable:false,type:'spot',duration:60,travelAfter:20},
-  {id:'hotel_in',day:1,startH:13,startM:30,name:'웰파크호텔',menu:'체크인 · 짐 풀기',phone:'063-560-3333',hours:'체크인15시/체크아웃11시',lat:35.431,lng:126.742,mapLat:35.438,mapLng:126.745,refundable:false,type:'hotel',duration:20,travelAfter:5},
-  {id:'joyang',day:1,startH:14,startM:0,name:'옛도심조양관',menu:'감성 카페 · 읍성 근처',phone:'010-2198-9421',hours:'10:30~21:00',lat:35.434,lng:126.701,mapLat:35.445,mapLng:126.718,refundable:true,type:'cafe',duration:40,travelAfter:25},
+  {id:'joyang',day:1,startH:13,startM:30,name:'옛도심조양관',menu:'감성 카페 · 읍성 근처',phone:'010-2198-9421',hours:'10:30~21:00',lat:35.434,lng:126.701,mapLat:35.445,mapLng:126.718,refundable:true,type:'cafe',duration:40,travelAfter:5},
+  {id:'hotel_in',day:1,startH:14,startM:0,name:'웰파크호텔',menu:'체크인 · 짐 풀기',phone:'063-560-3333',hours:'체크인15시/체크아웃11시',lat:35.431,lng:126.742,mapLat:35.438,mapLng:126.745,refundable:false,type:'hotel',duration:20,travelAfter:25},
   {id:'geumdan',day:1,startH:15,startM:0,name:'금단양만',menu:'민물장어 셀프구이 (1kg 66,000원)',phone:'063-563-5125',hours:'10:30~21:00',lat:35.537,lng:126.554,mapLat:35.545,mapLng:126.562,refundable:false,type:'food',duration:60,travelAfter:25},
   {id:'barley',day:1,startH:16,startM:30,name:'청보리밭',menu:'축제 중 · 유채꽃 · 노을 타임!',phone:'063-564-9897',hours:'상시(일몰추천)',lat:35.377,lng:126.542,mapLat:35.3766,mapLng:126.542,refundable:false,type:'spot',note:'주차 1만원→상품권 환급',duration:80,travelAfter:35},
   {id:'eupseong',day:1,startH:18,startM:30,name:'고창읍성',menu:'철쭉 산책 · 석양 뷰',phone:'063-560-8067',hours:'09~22시',lat:35.431,lng:126.704,mapLat:35.425,mapLng:126.700,refundable:false,type:'spot',duration:30,travelAfter:3},
@@ -55,7 +55,7 @@ const DEFAULT_PLACES = [
 const TRAVEL={
   'sugung→seonunsa_d1':20,'seonunsa_d1→sugung':20,'sugung→hotel_in':25,'hotel_in→sugung':25,
   'sugung→geumdan':5,'geumdan→sugung':5,'sugung→barley':35,'barley→sugung':35,
-  'seonunsa_d1→hotel_in':20,'hotel_in→seonunsa_d1':20,'seonunsa_d1→joyang':25,'joyang→seonunsa_d1':25,
+  'seonunsa_d1→hotel_in':20,'hotel_in→seonunsa_d1':20,'seonunsa_d1→joyang':20,'joyang→seonunsa_d1':20,
   'hotel_in→joyang':5,'joyang→hotel_in':5,'hotel_in→eupseong':5,'eupseong→hotel_in':5,
   'hotel_in→sundubu':5,'sundubu→hotel_in':5,'hotel_in→oncheon1':0,'oncheon1→hotel_in':0,
   'joyang→geumdan':25,'geumdan→joyang':25,'joyang→eupseong':3,'eupseong→joyang':3,
