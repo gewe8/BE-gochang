@@ -6,6 +6,7 @@
 <title>고창 1박2일</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans KR',sans-serif;background:#f5f0eb;color:#2d2a26;overflow-x:hidden}.header{background:linear-gradient(135deg,#1a3a2a 0%,#2d5a3d 100%);color:#fff;padding:16px 20px 12px;position:relative;z-index:1000}.header h1{font-size:18px;font-weight:800;letter-spacing:-.5px}.header .subtitle{font-size:12px;color:#a8d4b8;margin-top:2px}.tabs{display:flex;background:#fff;border-bottom:2px solid #e8e2da;position:sticky;top:0;z-index:999}.tab{flex:1;padding:12px 0;text-align:center;font-size:14px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;color:#999}.tab.active-day1{color:#2563eb;border-bottom-color:#2563eb}.tab.active-day2{color:#ea580c;border-bottom-color:#ea580c}.tab.active-budget{color:#16a34a;border-bottom-color:#16a34a}#map{width:100%;height:45vh;min-height:300px}.budget-bar{background:#fff;padding:12px 20px;border-bottom:1px solid #e8e2da;display:flex;align-items:center;gap:12px}.budget-ring{width:48px;height:48px;position:relative;flex-shrink:0}.budget-ring svg{transform:rotate(-90deg)}.budget-ring .label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;font-weight:800;color:#16a34a}.budget-info{flex:1}.budget-info .title{font-size:11px;color:#888}.budget-info .amount{font-size:18px;font-weight:800;color:#2d2a26}.budget-info .detail{font-size:11px;color:#16a34a;margin-top:2px}.place-list{padding:0 16px 80px}.time-label{display:flex;align-items:center;gap:8px;padding:16px 0 4px}.time-label .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}.time-label .dot.day1{background:#2563eb}.time-label .dot.day2{background:#ea580c}.time-label .time{font-size:12px;font-weight:600;color:#888}.time-label .travel{font-size:10px;color:#bbb;margin-left:auto}.place-card{background:#fff;border-radius:14px;padding:16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}.place-card.refundable{border-left:4px solid #16a34a}.place-card.dragging{opacity:.5;transform:scale(.97);box-shadow:0 4px 16px rgba(0,0,0,.15)}.place-card .drag-handle{display:none;position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:18px;color:#ccc;cursor:grab;padding:8px}.place-card.editable .drag-handle{display:block}.place-card.editable{padding-left:36px}.place-card .badge{position:absolute;top:12px;right:12px;background:#dcfce7;color:#16a34a;font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px}.place-card .name{font-size:16px;font-weight:800;margin-bottom:4px}.place-card .menu{font-size:13px;color:#666;margin-bottom:6px}.place-card .meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}.place-card .meta span{font-size:11px;color:#888;background:#f5f0eb;padding:2px 8px;border-radius:8px}.place-card .phone-btn{display:inline-flex;align-items:center;gap:4px;background:#2d5a3d;color:#fff;font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;text-decoration:none}.place-card .phone-btn:active{background:#1a3a2a}.spend-row{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px dashed #e8e2da}.spend-row label{font-size:12px;color:#888;white-space:nowrap}.spend-row input{width:100px;border:1.5px solid #d4cfc7;border-radius:8px;padding:6px 10px;font-size:14px;font-family:'Noto Sans KR';text-align:right;outline:none}.spend-row input:focus{border-color:#2d5a3d}.spend-row .won{font-size:13px;color:#666}.edit-footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e8e2da;padding:10px 16px;display:flex;align-items:center;justify-content:flex-end;gap:8px;z-index:998;transition:transform .3s}.edit-footer.hidden{transform:translateY(100%)}.edit-footer .edit-btn{background:#f5f0eb;color:#666;border:1px solid #d4cfc7;padding:8px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR'}.edit-footer .save-btn{background:#2d5a3d;color:#fff;border:none;padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR'}.edit-footer .cancel-btn{background:#e8e2da;color:#666;border:none;padding:8px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR'}.edit-footer .editing-label{font-size:11px;color:#856404;margin-right:auto}.budget-page{padding:16px;display:none}.budget-page.active{display:block}.budget-section{background:#fff;border-radius:14px;padding:20px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}.budget-section h3{font-size:14px;font-weight:800;margin-bottom:12px;color:#2d2a26}.budget-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f5f0eb}.budget-row:last-child{border-bottom:none}.budget-row .label{font-size:13px;color:#666}.budget-row .value{font-size:14px;font-weight:800}.budget-row .refund-badge{font-size:10px;background:#dcfce7;color:#16a34a;padding:2px 6px;border-radius:10px;margin-left:6px}.total-bar{background:linear-gradient(135deg,#1a3a2a,#2d5a3d);color:#fff;border-radius:14px;padding:20px;text-align:center}.total-bar .big{font-size:28px;font-weight:800}.total-bar .sub{font-size:12px;color:#a8d4b8;margin-top:4px}.leaflet-popup-content-wrapper{border-radius:12px!important}.leaflet-popup-content{margin:10px 14px!important;font-family:'Noto Sans KR'!important}
@@ -86,6 +87,43 @@ function recalcTimes(P){
 }
 function fmt(m){const h=Math.floor(m/60),mm=m%60;return h+':'+mm.toString().padStart(2,'0');}
 
+// === Supabase 설정 ===
+const SUPABASE_URL = 'https://tarjpplltjmxsoqcxvvj.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRhcmpwcGxsdGpteHNvcWN4dnZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4OTgxNjksImV4cCI6MjA5MDQ3NDE2OX0.4vK3FQgOLObmwhqz2SWjNtKlBQvErDPQTIdJhZIebeo';
+const TRIP_ID = 'gochang-yesan-2026'; // 여행별 고유 ID
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function loadSpending() {
+  try {
+    const { data, error } = await sb.from('trip_spend').select('key,value').eq('trip_id', TRIP_ID);
+    if(!error && data) {
+      spending = {};
+      data.forEach(r => { spending[r.key] = r.value; });
+      localStorage.setItem('gc_spend', JSON.stringify(spending)); // 오프라인 백업
+    }
+  } catch(e) {
+    // 네트워크 실패시 localStorage에서 로드
+    try { spending = JSON.parse(localStorage.getItem('gc_spend')||'{}'); } catch(e2) { spending={}; }
+  }
+}
+
+async function saveSpend(key, val) {
+  try {
+    if(val > 0) {
+      await sb.from('trip_spend').upsert({ trip_id:TRIP_ID, key:key, value:val, updated_at:new Date().toISOString() }, { onConflict:'trip_id,key' });
+    } else {
+      await sb.from('trip_spend').delete().eq('trip_id',TRIP_ID).eq('key',key);
+    }
+  } catch(e) { /* 오프라인이면 localStorage만 사용 */ }
+}
+
+// 다른 사람이 입력한 내역 자동 반영 (30초마다)
+setInterval(async () => {
+  await loadSpending();
+  updateBudgetBar();
+  if(currentTab===3) renderBudgetPage();
+}, 30000);
+
 const ICONS={food:'🍽️',spot:'🏛️',cafe:'☕',hotel:'🏨',home:'🏠'};
 const DAY_COLORS={1:'#2563eb',2:'#ea580c'};
 const MAX_REFUND=140000;
@@ -94,13 +132,19 @@ let PLACES,map,currentTab=1,day1Layers,day2Layers,spending={},editMode=false,dra
 function loadPlaces(){const s=localStorage.getItem('gc_order_v9');if(s){try{PLACES=JSON.parse(s);return;}catch(e){}}PLACES=JSON.parse(JSON.stringify(DEFAULT_PLACES));}
 function savePlaces(){localStorage.setItem('gc_order_v9',JSON.stringify(PLACES));}
 
-function init(){
-  loadPlaces();try{spending=JSON.parse(localStorage.getItem('gc_spend')||'{}');}catch(e){spending={};}
+async function init(){
+  loadPlaces();
+  // 먼저 localStorage에서 빠르게 로드 (깜빡임 방지)
+  try{spending=JSON.parse(localStorage.getItem('gc_spend')||'{}');}catch(e){spending={};}
   map=L.map('map',{zoomControl:false}).setView([36.1,126.75],8);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(map);
   L.control.zoom({position:'bottomright'}).addTo(map);
   day1Layers=L.layerGroup();day2Layers=L.layerGroup();
   recalcTimes(PLACES);rebuildMap();day1Layers.addTo(map);switchTab(1);
+  // Supabase에서 최신 데이터 로드
+  await loadSpending();
+  updateBudgetBar();
+  if(currentTab===1||currentTab===2) renderPlaceList(currentTab);
   window.addEventListener('scroll',()=>{const f=document.getElementById('editFooter');if(editMode){f.classList.remove('hidden');return;}const c=window.scrollY;if(c>lastScrollY+10)f.classList.add('hidden');else if(c<lastScrollY-10)f.classList.remove('hidden');lastScrollY=c;});
 }
 
@@ -158,7 +202,7 @@ function toggleEdit(){editMode=!editMode;const f=document.getElementById('editFo
 function cancelEdit(){loadPlaces();editMode=false;document.getElementById('editFooter').innerHTML=`<button class="edit-btn" onclick="toggleEdit()">✏️ 동선 수정</button>`;recalcTimes(PLACES);rebuildMap();renderPlaceList(currentTab);}
 function saveEdit(){savePlaces();editMode=false;document.getElementById('editFooter').innerHTML=`<button class="edit-btn" onclick="toggleEdit()">✏️ 동선 수정</button>`;recalcTimes(PLACES);rebuildMap();renderPlaceList(currentTab);updateBudgetBar();}
 
-function usp(id,val){const n=parseInt(val)||0;if(n>0)spending[id]=n;else delete spending[id];localStorage.setItem('gc_spend',JSON.stringify(spending));updateBudgetBar();}
+function usp(id,val){const n=parseInt(val)||0;if(n>0)spending[id]=n;else delete spending[id];localStorage.setItem('gc_spend',JSON.stringify(spending));saveSpend(id,n);updateBudgetBar();}
 function calcRefund(t){return Math.min(t*0.7,MAX_REFUND);}
 
 function updateBudgetBar(){
@@ -274,7 +318,7 @@ function renderBudgetPage(){
   <div class="budget-row"><div class="label" style="color:#16a34a;">예상 환급</div><div class="value" style="color:#16a34a;">-${Math.round(er).toLocaleString()}원</div></div>
   <div class="budget-row" style="border-top:2px solid #16a34a;padding-top:10px;"><div class="label" style="font-weight:800;font-size:14px;color:#2d5a3d;">실질 부담</div><div class="value" style="font-size:18px;color:#2d5a3d;">${(grandTotal-Math.round(er)).toLocaleString()}원</div></div>
   </div>
-  <div style="text-align:center;padding:16px;"><button onclick="if(confirm('모든 지출 기록을 초기화할까요?')){spending={};localStorage.removeItem('gc_spend');switchTab(3);}" style="background:none;border:1px solid #ccc;border-radius:8px;padding:8px 20px;font-size:12px;color:#999;cursor:pointer;font-family:'Noto Sans KR';">지출 기록 초기화</button>
+  <div style="text-align:center;padding:16px;"><button onclick="if(confirm('모든 지출 기록을 초기화할까요?')){spending={};localStorage.removeItem('gc_spend');sb.from('trip_spend').delete().eq('trip_id',TRIP_ID).then(()=>{});switchTab(3);}" style="background:none;border:1px solid #ccc;border-radius:8px;padding:8px 20px;font-size:12px;color:#999;cursor:pointer;font-family:'Noto Sans KR';">지출 기록 초기화</button>
   <button onclick="if(confirm('순서를 기본값으로 되돌릴까요?')){localStorage.removeItem('gc_order_v9');loadPlaces();recalcTimes(PLACES);rebuildMap();switchTab(1);}" style="background:none;border:1px solid #ccc;border-radius:8px;padding:8px 20px;font-size:12px;color:#999;cursor:pointer;font-family:'Noto Sans KR';margin-top:8px;">순서 초기화</button></div>`;
 }
 document.addEventListener('DOMContentLoaded',init);
