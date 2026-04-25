@@ -171,6 +171,57 @@ function updateBudgetBar(){
   document.getElementById('ringLabel').textContent=Math.round(pr)+'%';
 }
 
+// 구간별 거리(km)와 통행료(원) - 방문한 장소 기준으로 합산
+const SEGMENTS = {
+  1: [ // Day 1 순서대로 구간
+    {from:'_start',to:'sugung',km:260,toll:16300},
+    {from:'sugung',to:'seonunsa_d1',km:15,toll:0},
+    {from:'seonunsa_d1',to:'hotel_in',km:18,toll:0},
+    {from:'hotel_in',to:'joyang',km:4,toll:0},
+    {from:'joyang',to:'geumdan',km:20,toll:0},
+    {from:'geumdan',to:'barley',km:20,toll:0},
+    {from:'barley',to:'eupseong',km:25,toll:0},
+    {from:'eupseong',to:'sundubu',km:2,toll:0},
+    {from:'sundubu',to:'oncheon1',km:5,toll:0},
+  ],
+  2: [ // Day 2
+    {from:'checkout',to:'myeonok',km:3,toll:0},
+    {from:'myeonok',to:'agroland',km:140,toll:8200},
+    {from:'agroland',to:'yesan_church',km:20,toll:0},
+    {from:'yesan_church',to:'yesan_market',km:1,toll:0},
+    {from:'yesan_market',to:'wisteria',km:5,toll:0},
+    {from:'wisteria',to:'yedangho',km:5,toll:0},
+    {from:'yedangho',to:'gohome',km:130,toll:10800},
+  ]
+};
+const FUEL_PRICE = 1980; // 원/L
+const FUEL_EFF = 12; // km/L
+const HOTEL_COST = 170000;
+const ONCHEON_PP = 6000; // 1인당
+const ONCHEON_PEOPLE = 3;
+
+function calcTransport(dayPlaces, daySegs) {
+  // 관광지(돈 안내는곳)는 동선상 지나가면 방문으로 체크
+  // 음식점/카페는 지출 입력되면 방문으로 체크
+  const visited = new Set();
+  dayPlaces.forEach(p => {
+    const hasSpend = (spending[p.id]||0) > 0;
+    const isFree = (p.type==='spot'||p.type==='hotel'||p.type==='home');
+    if(hasSpend || isFree) visited.add(p.id);
+  });
+  // 음식점 중 하나라도 방문했으면 그 사이 관광지도 방문한 것
+  let anyVisited = false;
+  dayPlaces.forEach(p => { if(visited.has(p.id)) anyVisited = true; });
+
+  let totalKm=0, totalToll=0;
+  if(anyVisited) {
+    daySegs.forEach(s => { totalKm+=s.km; totalToll+=s.toll; });
+  }
+  const fuelL = totalKm / FUEL_EFF;
+  const fuelCost = Math.round(fuelL * FUEL_PRICE);
+  return { km:totalKm, toll:totalToll, fuelL:Math.round(fuelL*10)/10, fuelCost };
+}
+
 function renderBudgetPage(){
   const pg=document.getElementById('budgetPage');let ta=0,tr=0,d1='',d2='';
   const etcRefund=spending['etc_refund']||0;
@@ -178,6 +229,20 @@ function renderBudgetPage(){
   [1,2].forEach(d=>{let r='';PLACES.filter(p=>p.day===d&&(p.type==='food'||p.type==='cafe')).forEach(p=>{const v=spending[p.id]||0;ta+=v;if(p.refundable)tr+=v;if(v>0)r+=`<div class="budget-row"><div class="label">${p.name}${p.refundable?'<span class="refund-badge">환급</span>':''}</div><div class="value">${v.toLocaleString()}원</div></div>`;});if(d===1)d1=r;else d2=r;});
   tr+=etcRefund; ta+=etcRefund+etcNormal;
   const er=calcRefund(tr);
+
+  // 교통비 계산
+  const t1=calcTransport(PLACES.filter(p=>p.day===1), SEGMENTS[1]);
+  const t2=calcTransport(PLACES.filter(p=>p.day===2), SEGMENTS[2]);
+  const totalKm=t1.km+t2.km, totalToll=t1.toll+t2.toll, totalFuel=t1.fuelCost+t2.fuelCost;
+  const totalTransport=totalToll+totalFuel;
+
+  // 숙박비
+  const oncheonCost = ONCHEON_PP * ONCHEON_PEOPLE;
+  const totalAccom = HOTEL_COST + oncheonCost;
+
+  // 총 지출
+  const grandTotal = ta + totalTransport + totalAccom;
+
   pg.innerHTML=`<div class="total-bar"><div style="font-size:12px;color:#a8d4b8;margin-bottom:4px;">예상 환급 (청년 70%)</div><div class="big">${Math.round(er).toLocaleString()}원</div><div class="sub">환급 가능 지출 ${tr.toLocaleString()}원 × 70% (최대 14만원)</div></div>
   <div class="budget-section" style="margin-top:12px;"><h3>🔵 1일차 고창</h3>${d1||'<div style="font-size:13px;color:#999;padding:8px 0;">아직 입력된 지출이 없어요</div>'}</div>
   <div class="budget-section"><h3>🟠 2일차 예산</h3>${d2||'<div style="font-size:13px;color:#999;padding:8px 0;">아직 입력된 지출이 없어요</div>'}</div>
@@ -186,11 +251,26 @@ function renderBudgetPage(){
     <div style="flex:1;min-width:140px;"><div style="font-size:12px;color:#16a34a;font-weight:600;margin-bottom:4px;">💰 환급 가능 (시장 등)</div><div class="spend-row" style="margin:0;padding:0;border:none;"><input type="number" inputmode="numeric" placeholder="0" value="${etcRefund||''}" onchange="usp('etc_refund',this.value);renderBudgetPage();" onfocus="this.select()" style="width:120px"><span class="won">원</span></div></div>
     <div style="flex:1;min-width:140px;"><div style="font-size:12px;color:#888;font-weight:600;margin-bottom:4px;">일반 지출</div><div class="spend-row" style="margin:0;padding:0;border:none;"><input type="number" inputmode="numeric" placeholder="0" value="${etcNormal||''}" onchange="usp('etc_normal',this.value);renderBudgetPage();" onfocus="this.select()" style="width:120px"><span class="won">원</span></div></div>
   </div></div>
-  <div class="budget-section"><h3>📊 요약</h3>
-  <div class="budget-row"><div class="label">총 식비</div><div class="value">${ta.toLocaleString()}원</div></div>
-  <div class="budget-row"><div class="label">환급 가능 합계</div><div class="value" style="color:#16a34a">${tr.toLocaleString()}원</div></div>
-  <div class="budget-row"><div class="label">예상 환급 (70%, 최대 14만)</div><div class="value" style="color:#16a34a">${Math.round(er).toLocaleString()}원</div></div>
-  <div class="budget-row"><div class="label">실질 식비 (총-환급)</div><div class="value">${(ta-Math.round(er)).toLocaleString()}원</div></div></div>
+  <div class="budget-section"><h3>🚗 교통비</h3>
+  <div style="font-size:10px;color:#bbb;margin-bottom:8px;">연비 12km/L · 유가 1,980원/L 기준</div>
+  <div class="budget-row"><div class="label">1일차 주행 (${t1.km}km)</div><div class="value">${t1.fuelCost.toLocaleString()}원</div></div>
+  <div class="budget-row"><div class="label">2일차 주행 (${t2.km}km)</div><div class="value">${t2.fuelCost.toLocaleString()}원</div></div>
+  <div class="budget-row"><div class="label">통행료 합계</div><div class="value">${totalToll.toLocaleString()}원</div></div>
+  <div class="budget-row" style="border-top:1.5px solid #e8e2da;padding-top:10px;"><div class="label" style="font-weight:700;">교통비 소계</div><div class="value">${totalTransport.toLocaleString()}원</div></div>
+  </div>
+  <div class="budget-section"><h3>🏨 숙박</h3>
+  <div class="budget-row"><div class="label">웰파크호텔 1박</div><div class="value">${HOTEL_COST.toLocaleString()}원</div></div>
+  <div class="budget-row"><div class="label">온천 (${ONCHEON_PP.toLocaleString()}원 × ${ONCHEON_PEOPLE}명)</div><div class="value">${oncheonCost.toLocaleString()}원</div></div>
+  <div class="budget-row" style="border-top:1.5px solid #e8e2da;padding-top:10px;"><div class="label" style="font-weight:700;">숙박 소계</div><div class="value">${totalAccom.toLocaleString()}원</div></div>
+  </div>
+  <div class="budget-section"><h3>📊 최종 요약</h3>
+  <div class="budget-row"><div class="label">식비 합계</div><div class="value">${ta.toLocaleString()}원</div></div>
+  <div class="budget-row"><div class="label">교통비</div><div class="value">${totalTransport.toLocaleString()}원</div></div>
+  <div class="budget-row"><div class="label">숙박비</div><div class="value">${totalAccom.toLocaleString()}원</div></div>
+  <div class="budget-row" style="border-top:2px solid #2d5a3d;padding-top:10px;"><div class="label" style="font-weight:800;font-size:14px;">총 지출</div><div class="value" style="font-size:18px;">${grandTotal.toLocaleString()}원</div></div>
+  <div class="budget-row"><div class="label" style="color:#16a34a;">예상 환급</div><div class="value" style="color:#16a34a;">-${Math.round(er).toLocaleString()}원</div></div>
+  <div class="budget-row" style="border-top:2px solid #16a34a;padding-top:10px;"><div class="label" style="font-weight:800;font-size:14px;color:#2d5a3d;">실질 부담</div><div class="value" style="font-size:18px;color:#2d5a3d;">${(grandTotal-Math.round(er)).toLocaleString()}원</div></div>
+  </div>
   <div style="text-align:center;padding:16px;"><button onclick="if(confirm('모든 지출 기록을 초기화할까요?')){spending={};localStorage.removeItem('gc_spend');switchTab(3);}" style="background:none;border:1px solid #ccc;border-radius:8px;padding:8px 20px;font-size:12px;color:#999;cursor:pointer;font-family:'Noto Sans KR';">지출 기록 초기화</button>
   <button onclick="if(confirm('순서를 기본값으로 되돌릴까요?')){localStorage.removeItem('gc_order_v9');loadPlaces();recalcTimes(PLACES);rebuildMap();switchTab(1);}" style="background:none;border:1px solid #ccc;border-radius:8px;padding:8px 20px;font-size:12px;color:#999;cursor:pointer;font-family:'Noto Sans KR';margin-top:8px;">순서 초기화</button></div>`;
 }
