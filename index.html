@@ -195,28 +195,31 @@ const SEGMENTS = {
   ]
 };
 const FUEL_PRICE = 1980; // 원/L
-const FUEL_EFF = 12; // km/L
+const FUEL_EFF = 15.5; // km/L (스포티지 NQ5 하이브리드)
 const HOTEL_COST = 170000;
 const ONCHEON_PP = 6000; // 1인당
 const ONCHEON_PEOPLE = 3;
 
 function calcTransport(dayPlaces, daySegs) {
-  // 관광지(돈 안내는곳)는 동선상 지나가면 방문으로 체크
-  // 음식점/카페는 지출 입력되면 방문으로 체크
-  const visited = new Set();
-  dayPlaces.forEach(p => {
-    const hasSpend = (spending[p.id]||0) > 0;
-    const isFree = (p.type==='spot'||p.type==='hotel'||p.type==='home');
-    if(hasSpend || isFree) visited.add(p.id);
+  // 음식점/카페에 지출이 입력된 곳이 하나라도 있어야 해당 일차 교통비 계산
+  const hasAnySpend = dayPlaces.some(p => (spending[p.id]||0) > 0);
+  if(!hasAnySpend) return { km:0, toll:0, fuelL:0, fuelCost:0 };
+
+  // 지출이 입력된 가장 마지막 음식점/카페까지의 구간만 합산
+  // (관광지는 동선상 지나가면 자동 포함)
+  let lastVisitedIdx = -1;
+  dayPlaces.forEach((p,i) => {
+    if((spending[p.id]||0) > 0) lastVisitedIdx = i;
   });
-  // 음식점 중 하나라도 방문했으면 그 사이 관광지도 방문한 것
-  let anyVisited = false;
-  dayPlaces.forEach(p => { if(visited.has(p.id)) anyVisited = true; });
+  // 관광지/호텔/홈은 무조건 포함이므로 마지막 관광지도 체크
+  dayPlaces.forEach((p,i) => {
+    if(p.type==='spot'||p.type==='home') {
+      if(i <= lastVisitedIdx || (lastVisitedIdx >= 0 && i > lastVisitedIdx)) lastVisitedIdx = Math.max(lastVisitedIdx, i);
+    }
+  });
 
   let totalKm=0, totalToll=0;
-  if(anyVisited) {
-    daySegs.forEach(s => { totalKm+=s.km; totalToll+=s.toll; });
-  }
+  daySegs.forEach(s => { totalKm+=s.km; totalToll+=s.toll; });
   const fuelL = totalKm / FUEL_EFF;
   const fuelCost = Math.round(fuelL * FUEL_PRICE);
   return { km:totalKm, toll:totalToll, fuelL:Math.round(fuelL*10)/10, fuelCost };
@@ -252,7 +255,7 @@ function renderBudgetPage(){
     <div style="flex:1;min-width:140px;"><div style="font-size:12px;color:#888;font-weight:600;margin-bottom:4px;">일반 지출</div><div class="spend-row" style="margin:0;padding:0;border:none;"><input type="number" inputmode="numeric" placeholder="0" value="${etcNormal||''}" onchange="usp('etc_normal',this.value);renderBudgetPage();" onfocus="this.select()" style="width:120px"><span class="won">원</span></div></div>
   </div></div>
   <div class="budget-section"><h3>🚗 교통비</h3>
-  <div style="font-size:10px;color:#bbb;margin-bottom:8px;">연비 12km/L · 유가 1,980원/L 기준</div>
+  <div style="font-size:10px;color:#bbb;margin-bottom:8px;">스포티지 NQ5 HEV · 연비 15.5km/L · 유가 1,980원/L</div>
   <div class="budget-row"><div class="label">1일차 주행 (${t1.km}km)</div><div class="value">${t1.fuelCost.toLocaleString()}원</div></div>
   <div class="budget-row"><div class="label">2일차 주행 (${t2.km}km)</div><div class="value">${t2.fuelCost.toLocaleString()}원</div></div>
   <div class="budget-row"><div class="label">통행료 합계</div><div class="value">${totalToll.toLocaleString()}원</div></div>
