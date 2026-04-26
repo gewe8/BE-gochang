@@ -9,7 +9,17 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans KR',sans-serif;background:#f5f0eb;color:#2d2a26;overflow-x:hidden}.header{background:linear-gradient(135deg,#1a3a2a 0%,#2d5a3d 100%);color:#fff;padding:16px 20px 12px;position:relative;z-index:1000}.header h1{font-size:18px;font-weight:800;letter-spacing:-.5px}.header .subtitle{font-size:12px;color:#a8d4b8;margin-top:2px}.tabs{display:flex;background:#fff;border-bottom:2px solid #e8e2da;position:sticky;top:0;z-index:999}.tab{flex:1;padding:12px 0;text-align:center;font-size:14px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;color:#999}.tab.active-day1{color:#2563eb;border-bottom-color:#2563eb}.tab.active-day2{color:#ea580c;border-bottom-color:#ea580c}.tab.active-budget{color:#16a34a;border-bottom-color:#16a34a}#map{width:100%;height:45vh;min-height:300px}.budget-bar{background:#fff;padding:12px 20px;border-bottom:1px solid #e8e2da;display:flex;align-items:center;gap:12px}.budget-ring{width:48px;height:48px;position:relative;flex-shrink:0}.budget-ring svg{transform:rotate(-90deg)}.budget-ring .label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;font-weight:800;color:#16a34a}.budget-info{flex:1}.budget-info .title{font-size:11px;color:#888}.budget-info .amount{font-size:18px;font-weight:800;color:#2d2a26}.budget-info .detail{font-size:11px;color:#16a34a;margin-top:2px}.place-list{padding:0 16px 80px}.time-label{display:flex;align-items:center;gap:8px;padding:16px 0 4px}.time-label .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}.time-label .dot.day1{background:#2563eb}.time-label .dot.day2{background:#ea580c}.time-label .time{font-size:12px;font-weight:600;color:#888}.time-label .travel{font-size:10px;color:#bbb;margin-left:auto}.place-card{background:#fff;border-radius:14px;padding:16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}.place-card.refundable{border-left:4px solid #16a34a}.place-card.dragging{opacity:.5;transform:scale(.97);box-shadow:0 4px 16px rgba(0,0,0,.15)}.place-card .drag-handle{display:none;position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:18px;color:#ccc;cursor:grab;padding:8px}.place-card.editable .drag-handle{display:block}.place-card.editable{padding-left:36px}.place-card .badge{position:absolute;top:12px;right:12px;background:#dcfce7;color:#16a34a;font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px}.place-card .name{font-size:16px;font-weight:800;margin-bottom:4px}.place-card .menu{font-size:13px;color:#666;margin-bottom:6px}.place-card .meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}.place-card .meta span{font-size:11px;color:#888;background:#f5f0eb;padding:2px 8px;border-radius:8px}.place-card .phone-btn{display:inline-flex;align-items:center;gap:4px;background:#2d5a3d;color:#fff;font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;text-decoration:none}.place-card .phone-btn:active{background:#1a3a2a}.spend-row{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px dashed #e8e2da}.spend-row label{font-size:12px;color:#888;white-space:nowrap}.spend-row input{width:100px;border:1.5px solid #d4cfc7;border-radius:8px;padding:6px 10px;font-size:14px;font-family:'Noto Sans KR';text-align:right;outline:none}.spend-row input:focus{border-color:#2d5a3d}.spend-row .won{font-size:13px;color:#666}.edit-footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e8e2da;padding:10px 16px;display:flex;align-items:center;justify-content:flex-end;gap:8px;z-index:998;transition:transform .3s}.edit-footer.hidden{transform:translateY(100%)}.edit-footer .edit-btn{background:#f5f0eb;color:#666;border:1px solid #d4cfc7;padding:8px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR'}.edit-footer .save-btn{background:#2d5a3d;color:#fff;border:none;padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR'}.edit-footer .cancel-btn{background:#e8e2da;color:#666;border:none;padding:8px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR'}.edit-footer .editing-label{font-size:11px;color:#856404;margin-right:auto}.budget-page{padding:16px;display:none}.budget-page.active{display:block}.budget-section{background:#fff;border-radius:14px;padding:20px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}.budget-section h3{font-size:14px;font-weight:800;margin-bottom:12px;color:#2d2a26}.budget-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f5f0eb}.budget-row:last-child{border-bottom:none}.budget-row .label{font-size:13px;color:#666}.budget-row .value{font-size:14px;font-weight:800}.budget-row .refund-badge{font-size:10px;background:#dcfce7;color:#16a34a;padding:2px 6px;border-radius:10px;margin-left:6px}.total-bar{background:linear-gradient(135deg,#1a3a2a,#2d5a3d);color:#fff;border-radius:14px;padding:20px;text-align:center}.total-bar .big{font-size:28px;font-weight:800}.total-bar .sub{font-size:12px;color:#a8d4b8;margin-top:4px}.leaflet-popup-content-wrapper{border-radius:12px!important}.leaflet-popup-content{margin:10px 14px!important;font-family:'Noto Sans KR'!important}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans KR',sans-serif;background:#f5f0eb;color:#2d2a26;overflow-x:hidden}.header{background:linear-gradient(135deg,#1a3a2a 0%,#2d5a3d 100%);color:#fff;padding:16px 20px 12px;position:relative;z-index:1000}.header h1{font-size:18px;font-weight:800;letter-spacing:-.5px}.header .subtitle{font-size:12px;color:#a8d4b8;margin-top:2px}.tabs{display:flex;background:#fff;border-bottom:2px solid #e8e2da;position:sticky;top:0;z-index:999}.tab{flex:1;padding:12px 0;text-align:center;font-size:14px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;color:#999}.tab.active-day1{color:#2563eb;border-bottom-color:#2563eb}.tab.active-day2{color:#ea580c;border-bottom-color:#ea580c}.tab.active-budget{color:#16a34a;border-bottom-color:#16a34a}#map{width:100%;height:45vh;min-height:300px}.budget-bar{background:#fff;padding:12px 20px;border-bottom:1px solid #e8e2da;display:flex;align-items:center;gap:12px}.budget-ring{width:48px;height:48px;position:relative;flex-shrink:0}.budget-ring svg{transform:rotate(-90deg)}.budget-ring .label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;font-weight:800;color:#16a34a}.budget-info{flex:1}.budget-info .title{font-size:11px;color:#888}.budget-info .amount{font-size:18px;font-weight:800;color:#2d2a26}.budget-info .detail{font-size:11px;color:#16a34a;margin-top:2px}.place-list{padding:0 16px 80px}.time-label{display:flex;align-items:center;gap:8px;padding:16px 0 4px}.time-label .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}.time-label .dot.day1{background:#2563eb}.time-label .dot.day2{background:#ea580c}.time-label .time{font-size:12px;font-weight:600;color:#888}.time-label .travel{font-size:10px;color:#bbb;margin-left:auto}.place-card{background:#fff;border-radius:14px;padding:16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}.place-card.refundable{border-left:4px solid #16a34a}.place-card.dragging{opacity:.5;transform:scale(.97);box-shadow:0 4px 16px rgba(0,0,0,.15)}.place-card .drag-handle{display:none;position:absolute;left:4px;top:50%;transform:translateY(-50%);font-size:18px;color:#ccc;cursor:grab;padding:8px}.place-card.editable .drag-handle{display:block}.place-card.editable{padding-left:36px}.place-card .badge{position:absolute;top:12px;right:12px;background:#dcfce7;color:#16a34a;font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px}.place-card .name{font-size:16px;font-weight:800;margin-bottom:4px}.place-card .menu{font-size:13px;color:#666;margin-bottom:6px}.place-card .meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}.place-card .meta span{font-size:11px;color:#888;background:#f5f0eb;padding:2px 8px;border-radius:8px}.place-card .phone-btn{display:inline-flex;align-items:center;gap:4px;background:#2d5a3d;color:#fff;font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;text-decoration:none}.place-card .phone-btn:active{background:#1a3a2a}.spend-row{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px dashed #e8e2da}.spend-row label{font-size:12px;color:#888;white-space:nowrap}.spend-row input{width:100px;border:1.5px solid #d4cfc7;border-radius:8px;padding:6px 10px;font-size:14px;font-family:'Noto Sans KR';text-align:right;outline:none}.spend-row input:focus{border-color:#2d5a3d}.spend-row .won{font-size:13px;color:#666}
+.sub-spend{margin-top:10px;padding-top:10px;border-top:1px dashed #e8e2da;}
+.sub-spend-item{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.sub-spend-item label{font-size:12px;color:#666;min-width:90px;white-space:nowrap;}
+.sub-spend-item input{width:90px;border:1.5px solid #d4cfc7;border-radius:8px;padding:5px 8px;font-size:13px;font-family:'Noto Sans KR';text-align:right;outline:none;}
+.sub-spend-item input:focus{border-color:#2d5a3d}
+.sub-spend-item .won{font-size:12px;color:#666}
+.visit-check{display:flex;align-items:center;gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed #e8e2da;}
+.visit-check button{background:#f5f0eb;border:1.5px solid #d4cfc7;border-radius:8px;padding:5px 14px;font-size:12px;cursor:pointer;font-family:'Noto Sans KR';transition:all .2s;}
+.visit-check button.checked{background:#2d5a3d;color:#fff;border-color:#2d5a3d;}
+.visit-check span{font-size:11px;color:#999;}.edit-footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e8e2da;padding:10px 16px;display:flex;align-items:center;justify-content:flex-end;gap:8px;z-index:998;transition:transform .3s}.edit-footer.hidden{transform:translateY(100%)}.edit-footer .edit-btn{background:#f5f0eb;color:#666;border:1px solid #d4cfc7;padding:8px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR'}.edit-footer .save-btn{background:#2d5a3d;color:#fff;border:none;padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR'}.edit-footer .cancel-btn{background:#e8e2da;color:#666;border:none;padding:8px 16px;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR'}.edit-footer .editing-label{font-size:11px;color:#856404;margin-right:auto}.budget-page{padding:16px;display:none}.budget-page.active{display:block}.budget-section{background:#fff;border-radius:14px;padding:20px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}.budget-section h3{font-size:14px;font-weight:800;margin-bottom:12px;color:#2d2a26}.budget-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f5f0eb}.budget-row:last-child{border-bottom:none}.budget-row .label{font-size:13px;color:#666}.budget-row .value{font-size:14px;font-weight:800}.budget-row .refund-badge{font-size:10px;background:#dcfce7;color:#16a34a;padding:2px 6px;border-radius:10px;margin-left:6px}.total-bar{background:linear-gradient(135deg,#1a3a2a,#2d5a3d);color:#fff;border-radius:14px;padding:20px;text-align:center}.total-bar .big{font-size:28px;font-weight:800}.total-bar .sub{font-size:12px;color:#a8d4b8;margin-top:4px}.leaflet-popup-content-wrapper{border-radius:12px!important}.leaflet-popup-content{margin:10px 14px!important;font-family:'Noto Sans KR'!important}
 </style>
 </head>
 <body>
@@ -41,7 +51,8 @@ const DEFAULT_PLACES = [
 
   // === Day 2: 예산 ===
   {id:'checkout',day:2,startH:9,startM:30,name:'아침온천 + 체크아웃',menu:'06시 온천 → 09:30 체크아웃',phone:'063-560-3333',hours:'온천 06시 오픈',lat:35.431,lng:126.742,mapLat:35.430,mapLng:126.742,refundable:false,type:'hotel',duration:10,travelAfter:90},
-  {id:'yesan_market',day:2,startH:11,startM:10,name:'예산전통시장',menu:'신광정육점 · 다방면커피 · 사과파이',phone:'041-333-3318',hours:'월 08~21시',lat:36.677,lng:126.850,mapLat:36.675,mapLng:126.850,refundable:false,type:'food',duration:50,travelAfter:3},
+  {id:'yesan_market',day:2,startH:11,startM:10,name:'예산전통시장',menu:'신광정육점 · 불판대여 · 다방면커피 · 사과파이',phone:'041-333-3318',hours:'월 08~21시',lat:36.677,lng:126.850,mapLat:36.675,mapLng:126.850,refundable:false,type:'food',duration:50,travelAfter:3,
+    subItems:[{key:'yesan_meat',label:'신광정육점'},{key:'yesan_grill',label:'불판빌리는곳'},{key:'yesan_coffee',label:'다방면커피'},{key:'yesan_pie',label:'사과파이'}]},
   {id:'yesan_church',day:2,startH:12,startM:5,name:'예산성당',menu:'충남기념물 164호 · 근대건축',phone:'041-332-2564',hours:'외관 상시',lat:36.680,lng:126.843,mapLat:36.683,mapLng:126.843,refundable:false,type:'spot',duration:15,travelAfter:10},
   {id:'yedangho',day:2,startH:12,startM:30,name:'예당호 출렁다리',menu:'402m 현수교 · 모노레일 · 전망대',phone:'041-339-8287',hours:'월 09~20시 (무료)',lat:36.639,lng:126.802,mapLat:36.639,mapLng:126.802,refundable:false,type:'spot',duration:50,travelAfter:8},
   {id:'wisteria',day:2,startH:13,startM:28,name:'등나무꽃',menu:'예산 등나무 군락지',phone:'',hours:'상시 (4월 말 개화)',lat:36.655,lng:126.815,mapLat:36.655,mapLng:126.815,refundable:false,type:'spot',address:'예산군 오가면 신장리 450-48',duration:20,travelAfter:50},
@@ -169,8 +180,34 @@ function switchTab(tab){
 
 function renderPlaceList(day){
   recalcTimes(PLACES);const list=document.getElementById('placeList'),places=PLACES.filter(p=>p.day===day);let html='';
-  places.forEach((p,i)=>{const isFood=p.type==='food'||p.type==='cafe',spendVal=spending[p.id]||'';
+  places.forEach((p,i)=>{const isFood=p.type==='food'||p.type==='cafe';const isSpot=p.type==='spot';
+  const spendVal=spending[p.id]||'';
   const gi=PLACES.indexOf(p);const ts=p._calcTime||'';const tr=(i>0&&p._travelBefore)?`🚗 ${p._travelBefore}분`:'';
+  const visited=spending['visit_'+p.id]||0;
+
+  // subItems 지출란 (예산시장 등)
+  let subHtml='';
+  if(!editMode && p.subItems) {
+    subHtml='<div class="sub-spend">';
+    p.subItems.forEach(s=>{
+      const sv=spending[s.key]||'';
+      subHtml+=`<div class="sub-spend-item"><label>💳 ${s.label}</label><input type="number" inputmode="numeric" placeholder="0" value="${sv}" onchange="usp('${s.key}',this.value)" onfocus="this.select()"><span class="won">원</span></div>`;
+    });
+    subHtml+='</div>';
+  }
+
+  // 일반 지출란 (subItems 없는 음식점/카페)
+  let spendHtml='';
+  if(!editMode && isFood && !p.subItems) {
+    spendHtml=`<div class="spend-row"><label>💳 지출</label><input type="number" inputmode="numeric" placeholder="0" value="${spendVal}" onchange="usp('${p.id}',this.value)" onfocus="this.select()"><span class="won">원</span></div>`;
+  }
+
+  // 관광지 방문체크
+  let visitHtml='';
+  if(!editMode && isSpot) {
+    visitHtml=`<div class="visit-check"><button class="${visited?'checked':''}" onclick="toggleVisit('${p.id}')">${visited?'✓ 방문완료':'방문 체크'}</button><span>주유비 계산에 반영</span></div>`;
+  }
+
   html+=`<div class="time-label"><div class="dot day${day}"></div><div class="time">${ts}</div>${tr?`<div class="travel">${tr}</div>`:''}</div>
   <div class="place-card ${p.refundable?'refundable':''} ${editMode?'editable':''}" draggable="${editMode}" data-idx="${gi}"
   ${editMode?`ondragstart="ds(event,${gi})" ondragover="dov(event)" ondrop="ddp(event,${gi})" ondragend="de(event)" ontouchstart="ts2(event,${gi})" ontouchmove="tm(event)" ontouchend="te2(event,${gi})"`:''}>
@@ -178,8 +215,17 @@ function renderPlaceList(day){
   <div class="name">${i+1}. ${p.name}</div><div class="menu">${p.menu}</div>
   <div class="meta">${p.hours?`<span>🕐 ${p.hours}</span>`:''}${p.address?`<span>📍 ${p.address}</span>`:''}${p.note?`<span>💡 ${p.note}</span>`:''}</div>
   ${!editMode&&p.phone?`<a class="phone-btn" href="tel:${p.phone.replace(/[^0-9\-+]/g,'')}">📞 ${p.phone}</a>`:''}
-  ${!editMode&&isFood?`<div class="spend-row"><label>💳 지출</label><input type="number" inputmode="numeric" placeholder="0" value="${spendVal}" onchange="usp('${p.id}',this.value)" onfocus="this.select()"><span class="won">원</span></div>`:''}
+  ${spendHtml}${subHtml}${visitHtml}
   </div>`;});list.innerHTML=html;
+}
+
+function toggleVisit(id){
+  const key='visit_'+id;
+  const cur=spending[key]||0;
+  if(cur){delete spending[key];saveSpend(key,0);}
+  else{spending[key]=1;saveSpend(key,1);}
+  localStorage.setItem('gc_spend',JSON.stringify(spending));
+  renderPlaceList(currentTab);updateBudgetBar();
 }
 
 function ds(e,i){dragSrcIdx=i;e.dataTransfer.effectAllowed='move';e.target.classList.add('dragging');}
@@ -235,22 +281,14 @@ const ONCHEON_PP = 6000; // 1인당
 const ONCHEON_PEOPLE = 3;
 
 function calcTransport(dayPlaces, daySegs) {
-  // 음식점/카페에 지출이 입력된 곳이 하나라도 있어야 해당 일차 교통비 계산
-  const hasAnySpend = dayPlaces.some(p => (spending[p.id]||0) > 0);
-  if(!hasAnySpend) return { km:0, toll:0, fuelL:0, fuelCost:0 };
-
-  // 지출이 입력된 가장 마지막 음식점/카페까지의 구간만 합산
-  // (관광지는 동선상 지나가면 자동 포함)
-  let lastVisitedIdx = -1;
-  dayPlaces.forEach((p,i) => {
-    if((spending[p.id]||0) > 0) lastVisitedIdx = i;
+  // 방문 여부 판단: 지출 입력 or 방문체크 or subItems 지출
+  const hasAnyVisit = dayPlaces.some(p => {
+    if((spending[p.id]||0) > 0) return true;
+    if((spending['visit_'+p.id]||0) > 0) return true;
+    if(p.subItems && p.subItems.some(s=>(spending[s.key]||0)>0)) return true;
+    return false;
   });
-  // 관광지/호텔/홈은 무조건 포함이므로 마지막 관광지도 체크
-  dayPlaces.forEach((p,i) => {
-    if(p.type==='spot'||p.type==='home') {
-      if(i <= lastVisitedIdx || (lastVisitedIdx >= 0 && i > lastVisitedIdx)) lastVisitedIdx = Math.max(lastVisitedIdx, i);
-    }
-  });
+  if(!hasAnyVisit) return { km:0, toll:0, fuelL:0, fuelCost:0 };
 
   let totalKm=0, totalToll=0;
   daySegs.forEach(s => { totalKm+=s.km; totalToll+=s.toll; });
@@ -263,7 +301,20 @@ function renderBudgetPage(){
   const pg=document.getElementById('budgetPage');let ta=0,tr=0,d1='',d2='';
   const etcRefund=spending['etc_refund']||0;
   const etcNormal=spending['etc_normal']||0;
-  [1,2].forEach(d=>{let r='';PLACES.filter(p=>p.day===d&&(p.type==='food'||p.type==='cafe')).forEach(p=>{const v=spending[p.id]||0;ta+=v;if(p.refundable)tr+=v;if(v>0)r+=`<div class="budget-row"><div class="label">${p.name}${p.refundable?'<span class="refund-badge">환급</span>':''}</div><div class="value">${v.toLocaleString()}원</div></div>`;});if(d===1)d1=r;else d2=r;});
+  [1,2].forEach(d=>{let r='';PLACES.filter(p=>p.day===d&&(p.type==='food'||p.type==='cafe')).forEach(p=>{
+    if(p.subItems){
+      let subTotal=0;
+      p.subItems.forEach(s=>{subTotal+=(spending[s.key]||0);});
+      ta+=subTotal;if(p.refundable)tr+=subTotal;
+      if(subTotal>0){
+        r+=`<div class="budget-row"><div class="label" style="font-weight:700">${p.name}</div><div class="value">${subTotal.toLocaleString()}원</div></div>`;
+        p.subItems.forEach(s=>{const sv=spending[s.key]||0;if(sv>0)r+=`<div class="budget-row"><div class="label" style="padding-left:12px;font-size:12px;color:#999;">└ ${s.label}</div><div class="value" style="font-size:12px;color:#999;">${sv.toLocaleString()}원</div></div>`;});
+      }
+    } else {
+      const v=spending[p.id]||0;ta+=v;if(p.refundable)tr+=v;
+      if(v>0)r+=`<div class="budget-row"><div class="label">${p.name}${p.refundable?'<span class="refund-badge">환급</span>':''}</div><div class="value">${v.toLocaleString()}원</div></div>`;
+    }
+  });if(d===1)d1=r;else d2=r;});
   tr+=etcRefund; ta+=etcRefund+etcNormal;
   const er=calcRefund(tr);
 
