@@ -202,10 +202,10 @@ function renderPlaceList(day){
     spendHtml=`<div class="spend-row"><label>💳 지출</label><input type="number" inputmode="numeric" placeholder="0" value="${spendVal}" onchange="usp('${p.id}',this.value)" onfocus="this.select()"><span class="won">원</span></div>`;
   }
 
-  // 관광지 방문체크
+  // 관광지/종착지 방문체크
   let visitHtml='';
-  if(!editMode && isSpot) {
-    visitHtml=`<div class="visit-check"><button class="${visited?'checked':''}" onclick="toggleVisit('${p.id}')">${visited?'✓ 방문완료':'방문 체크'}</button><span>주유비 계산에 반영</span></div>`;
+  if(!editMode && (isSpot || p.type==='home')) {
+    visitHtml=`<div class="visit-check"><button class="${visited?'checked':''}" onclick="toggleVisit('${p.id}')">${visited?'✓ 방문완료':'방문 체크'}</button></div>`;
   }
 
   html+=`<div class="time-label"><div class="dot day${day}"></div><div class="time">${ts}</div>${tr?`<div class="travel">${tr}</div>`:''}</div>
@@ -281,17 +281,25 @@ const ONCHEON_PP = 6000; // 1인당
 const ONCHEON_PEOPLE = 3;
 
 function calcTransport(dayPlaces, daySegs) {
-  // 방문 여부 판단: 지출 입력 or 방문체크 or subItems 지출
-  const hasAnyVisit = dayPlaces.some(p => {
-    if((spending[p.id]||0) > 0) return true;
-    if((spending['visit_'+p.id]||0) > 0) return true;
-    if(p.subItems && p.subItems.some(s=>(spending[s.key]||0)>0)) return true;
-    return false;
+  // 마지막으로 방문한 장소의 인덱스 찾기
+  let lastIdx = -1;
+  dayPlaces.forEach((p,i) => {
+    if((spending[p.id]||0) > 0) lastIdx = i;
+    if((spending['visit_'+p.id]||0) > 0) lastIdx = i;
+    if(p.subItems && p.subItems.some(s=>(spending[s.key]||0)>0)) lastIdx = i;
   });
-  if(!hasAnyVisit) return { km:0, toll:0, fuelL:0, fuelCost:0 };
+  if(lastIdx < 0) return { km:0, toll:0, fuelL:0, fuelCost:0 };
 
+  // 마지막 방문 장소까지의 구간만 합산
+  const lastPlace = dayPlaces[lastIdx];
   let totalKm=0, totalToll=0;
-  daySegs.forEach(s => { totalKm+=s.km; totalToll+=s.toll; });
+  for(let i=0; i<daySegs.length; i++){
+    totalKm += daySegs[i].km;
+    totalToll += daySegs[i].toll;
+    if(daySegs[i].to === lastPlace.id) break;
+    // home 타입이면 그 전 구간까지 포함 후 마지막 구간(귀가)도 포함
+    if(i === daySegs.length-1) break; // 끝까지 돌면 전부 포함
+  }
   const fuelL = totalKm / FUEL_EFF;
   const fuelCost = Math.round(fuelL * FUEL_PRICE);
   return { km:totalKm, toll:totalToll, fuelL:Math.round(fuelL*10)/10, fuelCost };
