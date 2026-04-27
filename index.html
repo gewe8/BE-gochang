@@ -58,7 +58,7 @@ const DEFAULT_PLACES = [
   {id:'yesan_church',day:2,startH:12,startM:5,name:'예산성당',menu:'충남기념물 164호 · 근대건축',phone:'041-332-2564',hours:'외관 상시',lat:36.680,lng:126.843,mapLat:36.683,mapLng:126.843,refundable:false,type:'spot',duration:15,travelAfter:10},
   {id:'yedangho',day:2,startH:12,startM:30,name:'예당호 출렁다리',menu:'402m 현수교 · 모노레일 · 전망대',phone:'041-339-8287',hours:'월 09~20시 (무료)',lat:36.639,lng:126.802,mapLat:36.639,mapLng:126.802,refundable:false,type:'spot',duration:50,travelAfter:8},
   {id:'wisteria',day:2,startH:13,startM:28,name:'등나무꽃',menu:'예산 등나무 군락지',phone:'',hours:'상시 (4월 말 개화)',lat:36.655,lng:126.815,mapLat:36.655,mapLng:126.815,refundable:false,type:'spot',address:'예산군 오가면 신장리 450-48',duration:20,travelAfter:50},
-  {id:'cheonan',day:2,startH:14,startM:38,name:'천안시외버스터미널',menu:'여행 끝!',phone:'',hours:'',lat:36.815,lng:127.156,mapLat:36.815,mapLng:127.156,refundable:false,type:'home',duration:0,travelAfter:0},
+  {id:'cheonan',day:2,startH:14,startM:38,name:'인천 롯데백화점',menu:'여행 끝!',phone:'',hours:'',lat:37.393,lng:126.725,mapLat:37.393,mapLng:126.725,refundable:false,type:'home',duration:0,travelAfter:0},
 ];
 
 const TRAVEL={
@@ -78,13 +78,13 @@ const TRAVEL={
   'yesan_market→yesan_church':3,'yesan_church→yesan_market':3,
   'yesan_church→yedangho':10,'yedangho→yesan_church':10,
   'yedangho→wisteria':8,'wisteria→yedangho':8,
-  'wisteria→cheonan':50,'cheonan→wisteria':50,
+  'wisteria→cheonan':120,'cheonan→wisteria':120,
   'yesan_market→yedangho':10,'yedangho→yesan_market':10,
   'yesan_market→wisteria':15,'wisteria→yesan_market':15,
   'yesan_church→wisteria':10,'wisteria→yesan_church':10,
-  'yedangho→cheonan':55,'cheonan→yedangho':55,
-  'yesan_church→cheonan':55,'cheonan→yesan_church':55,
-  'yesan_market→cheonan':55,'cheonan→yesan_market':55,
+  'yedangho→cheonan':130,'cheonan→yedangho':130,
+  'yesan_church→cheonan':140,'cheonan→yesan_church':140,
+  'yesan_market→cheonan':140,'cheonan→yesan_market':140,
 };
 
 function getTravelMin(a,b){return TRAVEL[a+'→'+b]||15;}
@@ -275,8 +275,7 @@ const SEGMENTS = {
     {from:'yesan_market2',to:'yesan_church',km:1,toll:0},
     {from:'yesan_church',to:'yedangho',km:8,toll:0},
     {from:'yedangho',to:'wisteria',km:5,toll:0},
-    {from:'wisteria',to:'cheonan',km:50,toll:3800},
-    {from:'cheonan',to:'_home',km:120,toll:7500},
+    {from:'wisteria',to:'cheonan',km:170,toll:11300},
   ]
 };
 const FUEL_PRICE = 1980; // 원/L
@@ -295,15 +294,22 @@ function calcTransport(dayPlaces, daySegs) {
   });
   if(lastIdx < 0) return { km:0, toll:0, fuelL:0, fuelCost:0 };
 
-  // 마지막 방문 장소까지의 구간만 합산
+  // 마지막 방문 장소까지의 구간 합산
   const lastPlace = dayPlaces[lastIdx];
   let totalKm=0, totalToll=0;
   for(let i=0; i<daySegs.length; i++){
     totalKm += daySegs[i].km;
     totalToll += daySegs[i].toll;
-    if(daySegs[i].to === lastPlace.id) break;
-    // home 타입이면 그 전 구간까지 포함 후 마지막 구간(귀가)도 포함
-    if(i === daySegs.length-1) break; // 끝까지 돌면 전부 포함
+    if(daySegs[i].to === lastPlace.id) {
+      // home/종착지면 그 뒤 귀가 구간도 모두 포함
+      if(lastPlace.type === 'home') {
+        for(let j=i+1; j<daySegs.length; j++){
+          totalKm += daySegs[j].km;
+          totalToll += daySegs[j].toll;
+        }
+      }
+      break;
+    }
   }
   const fuelL = totalKm / FUEL_EFF;
   const fuelCost = Math.round(fuelL * FUEL_PRICE);
